@@ -1,0 +1,369 @@
+/**
+ * Print Styles for Arab Board Event 2025
+ */
+
+@media print {
+    /* Reset and basic styles */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
+        -ms-filter: none !important;
+    }
+    
+    @page {
+        margin: 2cm;
+        size: A4;
+    }
+    
+    /* Hide non-essential elements */
+    .language-toggle,
+    .floating-actions,
+    .scroll-to-top,
+    .site-header,
+    .site-footer,
+    .event-navigation,
+    .pdf-controls,
+    .lightbox,
+    .mobile-menu-overlay,
+    .accessibility-toolbar,
+    .page-progress,
+    .loading-screen,
+    .search-form,
+    .social-media,
+    .app-download,
+    .footer-bottom,
+    button:not(.print-safe) {
+        display: none !important;
+    }
+    
+    /* Body and basic layout */
+    body {
+        font-family: 'Times New Roman', Times, serif !important;
+        font-size: 12pt !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .site-content {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .container {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: auto !important;
+    }
+    
+    /* Event Header */
+    .event-header {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 20pt 0 !important;
+        margin-bottom: 20pt !important;
+        border-bottom: 2pt solid #000 !important;
+    }
+    
+    .event-title {
+        font-size: 18pt !important;
+        font-weight: bold !important;
+        margin-bottom: 10pt !important;
+        text-align: center !important;
+    }
+    
+    .event-meta {
+        text-align: center !important;
+        font-size: 12pt !important;
+        margin-bottom: 15pt !important;
+    }
+    
+    .event-description {
+        font-size: 11pt !important;
+        line-height: 1.3 !important;
+        text-align: justify !important;
+    }
+    
+    /* Day sections */
+    .day-section {
+        page-break-before: always;
+        margin-bottom: 30pt !important;
+    }
+    
+    .day-section:first-of-type {
+        page-break-before: auto;
+    }
+    
+    .section-header h2 {
+        font-size: 16pt !important;
+        font-weight: bold !important;
+        margin-bottom: 15pt !important;
+        padding-bottom: 5pt !important;
+        border-bottom: 1pt solid #000 !important;
+    }
+    
+    /* Schedule tables */
+    .schedule-table {
+        width: 100% !important;
+        margin-bottom: 20pt !important;
+    }
+    
+    .schedule-table table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 10pt !important;
+    }
+    
+    .schedule-table th,
+    .schedule-table td {
+        border: 1pt solid #000 !important;
+        padding: 8pt !important;
+        text-align: right !important;
+        vertical-align: top !important;
+    }
+    
+    .schedule-table th {
+        background: #f0f0f0 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+    }
+    
+    .schedule-table .time {
+        width: 20% !important;
+        text-align: center !important;
+        font-weight: bold !important;
+    }
+    
+    /* Images section */
+    .images-section {
+        margin-top: 20pt !important;
+        page-break-inside: avoid;
+    }
+    
+    .images-section h3 {
+        font-size: 14pt !important;
+        font-weight: bold !important;
+        margin-bottom: 10pt !important;
+    }
+    
+    .images-gallery {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 10pt !important;
+        margin-bottom: 20pt !important;
+    }
+    
+    .image-item {
+        page-break-inside: avoid;
+        margin-bottom: 5pt !important;
+    }
+    
+    .image-item img {
+        width: 100% !important;
+        height: auto !important;
+        border: 1pt solid #ccc !important;
+    }
+    
+    /* PDF sections - show info instead of viewer */
+    .pdf-section {
+        margin-bottom: 20pt !important;
+        padding: 10pt !important;
+        border: 1pt solid #ccc !important;
+        background: #f9f9f9 !important;
+    }
+    
+    .pdf-section h3 {
+        font-size: 12pt !important;
+        font-weight: bold !important;
+        margin-bottom: 8pt !important;
+    }
+    
+    .pdf-viewer::after {
+        content: "ملف PDF متاح في النسخة الإلكترونية" !important;
+        font-style: italic !important;
+        color: #666 !important;
+        display: block !important;
+        text-align: center !important;
+        padding: 20pt !important;
+        border: 1pt dashed #ccc !important;
+        background: #f5f5f5 !important;
+    }
+    
+    .pdf-container,
+    .pdf-controls {
+        display: none !important;
+    }
+    
+    /* QR Cards */
+    .qr-section {
+        page-break-before: always;
+        margin-top: 30pt !important;
+    }
+    
+    .qr-cards-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15pt !important;
+    }
+    
+    .qr-card {
+        page-break-inside: avoid;
+        border: 1pt solid #000 !important;
+        padding: 10pt !important;
+        text-align: center !important;
+        background: #fff !important;
+    }
+    
+    .qr-image img {
+        width: 80pt !important;
+        height: 80pt !important;
+        margin-bottom: 8pt !important;
+    }
+    
+    .qr-title {
+        font-size: 11pt !important;
+        font-weight: bold !important;
+        margin-bottom: 5pt !important;
+    }
+    
+    .qr-actions {
+        font-size: 9pt !important;
+        color: #666 !important;
+    }
+    
+    .qr-link-btn::after {
+        content: " (" attr(href) ")" !important;
+        font-size: 8pt !important;
+        color: #999 !important;
+        word-break: break-all !important;
+    }
+    
+    /* Typography improvements */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+        margin-top: 15pt !important;
+        margin-bottom: 10pt !important;
+    }
+    
+    p {
+        margin-bottom: 8pt !important;
+        orphans: 3;
+        widows: 3;
+    }
+    
+    /* Links */
+    a {
+        color: #000 !important;
+        text-decoration: underline !important;
+    }
+    
+    a[href^="http"]:after {
+        content: " (" attr(href) ")" !important;
+        font-size: 8pt !important;
+        color: #666 !important;
+    }
+    
+    /* Language support */
+    .lang-en {
+        display: none !important;
+    }
+    
+    .lang-ar {
+        display: block !important;
+    }
+    
+    /* Arabic text alignment */
+    [dir="rtl"],
+    .rtl {
+        text-align: right !important;
+        direction: rtl !important;
+    }
+    
+    /* Print header */
+    .print-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40pt;
+        padding: 10pt;
+        border-bottom: 1pt solid #ccc;
+        background: #fff;
+        font-size: 10pt;
+        text-align: center;
+    }
+    
+    /* Print footer */
+    .print-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 30pt;
+        padding: 8pt;
+        border-top: 1pt solid #ccc;
+        background: #fff;
+        font-size: 9pt;
+        text-align: center;
+    }
+    
+    /* Page numbers */
+    @page {
+        @bottom-center {
+            content: "صفحة " counter(page) " من " counter(pages);
+            font-size: 9pt;
+            font-family: Arial, sans-serif;
+        }
+        
+        @top-center {
+            content: "ملتقى المجلس العربي للاختصاصات الصحية 2025";
+            font-size: 10pt;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+        }
+    }
+    
+    /* Utility classes for print */
+    .print-only {
+        display: block !important;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    .page-break-before {
+        page-break-before: always !important;
+    }
+    
+    .page-break-after {
+        page-break-after: always !important;
+    }
+    
+    .page-break-avoid {
+        page-break-inside: avoid !important;
+    }
+    
+    /* High contrast mode for accessibility */
+    @media print and (prefers-contrast: high) {
+        * {
+            background: #fff !important;
+            color: #000 !important;
+        }
+        
+        .schedule-table th {
+            background: #000 !important;
+            color: #fff !important;
+        }
+        
+        .qr-card,
+        .pdf-section {
+            border-width: 2pt !important;
+        }
+    }
+}

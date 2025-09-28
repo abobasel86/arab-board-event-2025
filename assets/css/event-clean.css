@@ -1,0 +1,508 @@
+/* Event Page Clean Styles - Override Everything */
+
+/* Force clean slate */
+* {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Hide WordPress default elements completely */
+.admin-bar, 
+.wp-toolbar, 
+#wpadminbar,
+.site-header:not(.event-header),
+.site-footer:not(.event-footer),
+.wp-block-navigation,
+.wp-site-blocks > header,
+.wp-site-blocks > footer,
+.entry-header,
+.entry-footer,
+.post-navigation,
+.site-branding,
+.main-navigation,
+nav:not(.event-navigation),
+.breadcrumbs,
+.page-progress,
+.accessibility-toolbar {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Force body styling */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: linear-gradient(135deg, #f8fafa 0%, #ffffff 100%) !important;
+    color: #2c3e50 !important;
+    direction: rtl !important;
+    text-align: right !important;
+    font-family: 'Almarai', 'Cairo', Arial, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+    overflow-x: hidden !important;
+}
+
+/* Force main content to be full width */
+.site-main,
+#main,
+main,
+.wp-site-blocks,
+.entry-content {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+/* Container styling */
+.container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 2rem !important;
+}
+
+/* Force event header colors and layout */
+.event-header {
+    background: linear-gradient(135deg, #156b68 0%, #0f5855 100%) !important;
+    color: #ffffff !important;
+    padding: 1.5rem 0 !important;
+    text-align: center !important;
+    margin: 0 !important;
+    width: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(21, 107, 104, 0.2) !important;
+    border-bottom: 4px solid #caa453 !important;
+}
+
+.event-title {
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+    color: #caa453 !important;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4) !important;
+    margin-bottom: 1rem !important;
+    line-height: 1.2 !important;
+}
+
+.event-meta {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 2rem !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 2rem !important;
+    font-size: 1.1rem !important;
+}
+
+.event-location,
+.event-dates {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Language toggle positioning and styling */
+.language-toggle {
+    position: fixed !important;
+    top: 2rem !important;
+    right: 2rem !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    background: #ffffff !important;
+    border-radius: 20px !important;
+    padding: 0.5rem !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.15) !important;
+    border: 2px solid #156b68 !important;
+}
+
+.lang-btn {
+    background: transparent !important;
+    color: #156b68 !important;
+    border: none !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 15px !important;
+    cursor: pointer !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s ease !important;
+    min-width: 60px !important;
+}
+
+.lang-btn.active {
+    background: #156b68 !important;
+    color: #ffffff !important;
+}
+
+.lang-btn:hover {
+    background: #caa453 !important;
+    color: #ffffff !important;
+}
+
+/* Navigation tabs */
+.event-navigation {
+    background: #ffffff !important;
+    border-bottom: 3px solid #156b68 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.15) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.nav-tabs {
+    display: flex !important;
+    justify-content: center !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0.5rem !important;
+}
+
+.nav-tab {
+    display: inline-block !important;
+    padding: 1rem 2rem !important;
+    color: #2c3e50 !important;
+    text-decoration: none !important;
+    border-bottom: 4px solid transparent !important;
+    transition: all 0.3s ease !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+}
+
+.nav-tab:hover,
+.nav-tab.active {
+    color: #ffffff !important;
+    border-bottom-color: #caa453 !important;
+    background: #156b68 !important;
+}
+
+/* Day sections */
+.day-section {
+    margin: 3rem 0 !important;
+    padding: 3rem 0 !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.15) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.day-section::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 4px !important;
+    background: linear-gradient(135deg, #caa453 0%, #b8934a 100%) !important;
+}
+
+.section-header h2 {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+    position: relative !important;
+}
+
+.section-header h2::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 60px !important;
+    height: 3px !important;
+    background: #caa453 !important;
+    border-radius: 2px !important;
+}
+
+/* Content layout */
+.row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
+    margin-bottom: 2rem !important;
+}
+
+/* PDF and Schedule sections */
+.pdf-section,
+.schedule-section {
+    background: #f8fafa !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    border: 2px solid #156b68 !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.15) !important;
+}
+
+.pdf-section h3,
+.schedule-section h3 {
+    color: #156b68 !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1rem !important;
+    text-align: center !important;
+    border-bottom: 2px solid #caa453 !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Tables */
+.schedule-table table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
+.schedule-table th {
+    background: #156b68 !important;
+    color: #ffffff !important;
+    padding: 0.8rem !important;
+    text-align: center !important;
+    font-weight: 700 !important;
+}
+
+.schedule-table td {
+    padding: 0.8rem !important;
+    border-bottom: 1px solid #e1e8ed !important;
+    text-align: center !important;
+}
+
+.schedule-table .time {
+    background: rgba(21, 107, 104, 0.05) !important;
+    font-weight: 700 !important;
+    color: #156b68 !important;
+}
+
+.schedule-table .activity {
+    text-align: right !important;
+}
+
+/* Images and QR sections */
+.images-gallery {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: 1rem !important;
+}
+
+.image-item {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.15) !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.image-item:hover {
+    transform: translateY(-4px) !important;
+}
+
+.image-item img {
+    width: 100% !important;
+    height: 150px !important;
+    object-fit: cover !important;
+}
+
+.qr-section {
+    background: #f8fafa !important;
+    padding: 3rem 0 !important;
+    margin-top: 3rem !important;
+    border-radius: 12px !important;
+}
+
+.qr-cards-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 1.5rem !important;
+}
+
+.qr-card {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    text-align: center !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.15) !important;
+    border: 2px solid #156b68 !important;
+    transition: all 0.3s ease !important;
+}
+
+.qr-card:hover {
+    transform: translateY(-6px) !important;
+}
+
+.qr-image img {
+    width: 120px !important;
+    height: 120px !important;
+    border-radius: 12px !important;
+}
+
+.qr-title {
+    color: #156b68 !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    margin: 1rem 0 !important;
+}
+
+/* Buttons and links */
+.pdf-btn,
+.qr-link-btn,
+.qr-share-btn {
+    background: #156b68 !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 0.6rem 1rem !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    display: inline-block !important;
+    margin: 0.2rem !important;
+}
+
+.pdf-btn:hover,
+.qr-link-btn:hover,
+.qr-share-btn:hover {
+    background: #caa453 !important;
+}
+
+/* Floating actions */
+.floating-actions {
+    position: fixed !important;
+    bottom: 2rem !important;
+    left: 2rem !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.8rem !important;
+}
+
+.fab {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: #156b68 !important;
+    color: #ffffff !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.2rem !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.15) !important;
+    transition: all 0.3s ease !important;
+}
+
+.fab:hover {
+    transform: scale(1.1) !important;
+}
+
+.print-btn {
+    background: #caa453 !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .event-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .event-meta {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+    
+    .language-toggle {
+        top: 1rem !important;
+        right: 1rem !important;
+    }
+    
+    .row {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .nav-tab {
+        padding: 0.8rem 1.2rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .images-gallery {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .qr-cards-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Language control */
+.lang-en {
+    display: none !important;
+}
+
+.lang-ar {
+    display: block !important;
+}
+
+/* Fix any remaining WordPress interference */
+.wp-block-group,
+.wp-block-cover,
+.entry-title,
+.site-title {
+    all: unset !important;
+}
+
+/* Ensure proper text direction */
+* {
+    direction: rtl !important;
+}
+
+.alignleft {
+    float: right !important;
+}
+
+.alignright {
+    float: left !important;
+}
+
+/* Full width sections for improved layout */
+.schedule-section.full-width,
+.pdf-section.full-width {
+    width: 100% !important;
+    margin-bottom: 3rem !important;
+}
+
+.schedule-section.full-width .schedule-table,
+.pdf-section.full-width .pdf-viewer {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.schedule-section.full-width table {
+    width: 100% !important;
+    font-size: 1rem !important;
+}
+
+.pdf-section.full-width .pdf-container {
+    width: 100% !important;
+    max-width: none !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.pdf-section.full-width canvas {
+    max-width: 100% !important;
+    height: auto !important;
+}

@@ -1,0 +1,333 @@
+/* 
+ * عاجل: إصلاح الألوان والتنسيقات
+ * High Priority Color and Layout Fix
+ */
+
+/* فرض الألوان الجديدة على جميع العناصر */
+/* Force new colors on all elements */
+
+html, body {
+    background: linear-gradient(135deg, #f8fafa 0%, #ffffff 100%) !important;
+    color: #2c3e50 !important;
+    direction: rtl !important;
+    text-align: right !important;
+    font-family: 'Almarai', 'Cairo', Arial, sans-serif !important;
+}
+
+/* الألوان الأساسية للموقع */
+/* Primary site colors */
+:root {
+    --new-primary: #156b68 !important;
+    --new-accent: #caa453 !important;
+    --new-secondary: #0f5855 !important;
+}
+
+/* رأس الموقع */
+/* Site header */
+.site-header,
+header,
+.wp-block-cover,
+.has-background {
+    background: linear-gradient(135deg, #156b68 0%, #0f5855 100%) !important;
+    color: #ffffff !important;
+    padding: 3rem 0 !important;
+}
+
+/* العناوين */
+/* Headings */
+h1, h2, h3, h4, h5, h6,
+.site-title,
+.site-title a,
+.wp-block-heading,
+.entry-title,
+.page-title {
+    color: #caa453 !important;
+    font-weight: 800 !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+.site-title a {
+    text-decoration: none !important;
+}
+
+/* التنقل والقوائم */
+/* Navigation and menus */
+.main-navigation,
+.nav-menu,
+.menu,
+nav,
+.wp-block-navigation {
+    background: #156b68 !important;
+}
+
+.nav-menu li a,
+.menu-item a,
+.wp-block-navigation-item a,
+nav a {
+    background: linear-gradient(135deg, #156b68 0%, #0f5855 100%) !important;
+    color: #ffffff !important;
+    padding: 1rem 2rem !important;
+    margin: 0 0.5rem !important;
+    border-radius: 8px !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    display: inline-block !important;
+    transition: all 0.3s ease !important;
+}
+
+.nav-menu li a:hover,
+.menu-item a:hover,
+.wp-block-navigation-item a:hover,
+nav a:hover {
+    background: linear-gradient(135deg, #caa453 0%, #b8934a 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(21, 107, 104, 0.3) !important;
+}
+
+/* الأزرار */
+/* Buttons */
+button,
+.wp-block-button__link,
+.btn,
+input[type="submit"],
+input[type="button"],
+.wp-element-button {
+    background: linear-gradient(135deg, #156b68 0%, #0f5855 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+button:hover,
+.wp-block-button__link:hover,
+.btn:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+    background: linear-gradient(135deg, #caa453 0%, #b8934a 100%) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* الروابط */
+/* Links */
+a {
+    color: #156b68 !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: #caa453 !important;
+}
+
+/* مناطق المحتوى */
+/* Content areas */
+.entry-content,
+.wp-block-group,
+.wp-block-column,
+article,
+.post {
+    background: #ffffff !important;
+    padding: 2rem !important;
+    margin: 1rem 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(21, 107, 104, 0.1) !important;
+    border-left: 4px solid #caa453 !important;
+}
+
+/* الشريط الجانبي */
+/* Sidebar */
+.widget,
+.wp-block-widget,
+aside {
+    background: #ffffff !important;
+    padding: 1.5rem !important;
+    margin-bottom: 2rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(21, 107, 104, 0.1) !important;
+    border-top: 3px solid #156b68 !important;
+}
+
+.widget-title,
+.wp-block-widget h2,
+.wp-block-widget h3 {
+    color: #156b68 !important;
+    border-bottom: 2px solid #caa453 !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1rem !important;
+}
+
+/* التذييل */
+/* Footer */
+.site-footer,
+footer {
+    background: #156b68 !important;
+    color: #ffffff !important;
+    padding: 3rem 0 !important;
+    margin-top: 3rem !important;
+}
+
+.site-footer a,
+footer a {
+    color: #caa453 !important;
+}
+
+.site-footer a:hover,
+footer a:hover {
+    color: #ffffff !important;
+}
+
+/* تخصيص الكتل */
+/* Block customizations */
+.wp-block-cover__inner-container {
+    color: #ffffff !important;
+}
+
+.wp-block-quote {
+    border-right: 4px solid #caa453 !important;
+    border-left: none !important;
+    padding-right: 1rem !important;
+    padding-left: 0 !important;
+    background: rgba(21, 107, 104, 0.05) !important;
+}
+
+.wp-block-pullquote {
+    border-top: 4px solid #caa453 !important;
+    border-bottom: 4px solid #caa453 !important;
+    color: #156b68 !important;
+}
+
+/* نماذج الإدخال */
+/* Forms */
+input[type="text"],
+input[type="email"],
+input[type="search"],
+textarea,
+select {
+    border: 2px solid #e1e8ed !important;
+    border-radius: 8px !important;
+    padding: 0.8rem !important;
+    font-family: inherit !important;
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #156b68 !important;
+    box-shadow: 0 0 0 3px rgba(21, 107, 104, 0.1) !important;
+    outline: none !important;
+}
+
+/* الجداول */
+/* Tables */
+table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(21, 107, 104, 0.1) !important;
+}
+
+th {
+    background: #156b68 !important;
+    color: #ffffff !important;
+    padding: 1rem !important;
+    font-weight: 700 !important;
+}
+
+td {
+    padding: 1rem !important;
+    border-bottom: 1px solid #e1e8ed !important;
+}
+
+tr:hover {
+    background: rgba(21, 107, 104, 0.05) !important;
+}
+
+/* الاستجابة للهواتف */
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .site-header,
+    header {
+        padding: 2rem 0 !important;
+    }
+    
+    h1 {
+        font-size: 2rem !important;
+    }
+    
+    .nav-menu li a,
+    .menu-item a {
+        padding: 0.8rem 1.2rem !important;
+        margin: 0.2rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .entry-content,
+    .wp-block-group,
+    article {
+        padding: 1rem !important;
+        margin: 0.5rem 0 !important;
+    }
+}
+
+/* تأكيد الاتجah من اليمين لليسار */
+/* Ensure RTL direction */
+* {
+    direction: rtl !important;
+}
+
+.alignleft {
+    float: right !important;
+    margin-left: 1rem !important;
+    margin-right: 0 !important;
+}
+
+.alignright {
+    float: left !important;
+    margin-right: 1rem !important;
+    margin-left: 0 !important;
+}
+
+/* إخفاء العناصر غير المرغوب فيها */
+/* Hide unwanted elements */
+.wp-block-social-links {
+    justify-content: flex-end !important;
+}
+
+/* تحسينات إضافية */
+/* Additional improvements */
+body.admin-bar {
+    margin-top: 46px !important;
+}
+
+@media screen and (max-width: 782px) {
+    body.admin-bar {
+        margin-top: 32px !important;
+    }
+}
+
+/* ضمان عرض الألوان في جميع المتصفحات */
+/* Ensure colors display in all browsers */
+*, *::before, *::after {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* فرض تطبيق الأنماط */
+/* Force style application */
+html {
+    scroll-behavior: smooth !important;
+}
+
+body {
+    background-attachment: fixed !important;
+}

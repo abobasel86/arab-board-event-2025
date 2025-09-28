@@ -1,0 +1,238 @@
+/*
+Theme Name: Arab Board Event 2025
+Description: موضوع متكامل لملتقى المجلس العربي للاختصاصات الصحية 2025 - يدعم العربية والإنجليزية مع نظام إدارة الفعاليات المتقدم
+Version: 1.2.0
+Author: Arab Board Development Team
+Author URI: https://arabboard.org
+Theme URI: https://arabboard.org/themes/event-2025
+Text Domain: arab-board-event-2025
+Domain Path: /languages
+Requires at least: 6.0
+Tested up to: 6.4
+Requires PHP: 8.0
+License: GPL v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Tags: events, arabic, rtl, responsive, conference, medical, bilingual
+*/
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #156b68;
+    --secondary-color: #caa453;
+    --accent-color: #0f5855;
+    --text-dark: #2c3e50;
+    --text-light: #5a6c7d;
+    --bg-light: #f8fafa;
+    --white: #ffffff;
+    --shadow: 0 4px 20px rgba(21, 107, 104, 0.15);
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --gradient-primary: linear-gradient(135deg, #156b68 0%, #0f5855 100%);
+    --gradient-accent: linear-gradient(135deg, #caa453 0%, #b8934a 100%);
+}
+
+body {
+    font-family: 'Almarai', 'Cairo', 'Roboto', sans-serif;
+    line-height: 1.7;
+    color: var(--text-dark);
+    background: linear-gradient(135deg, var(--bg-light) 0%, var(--white) 100%);
+    direction: rtl;
+    text-align: right;
+}
+
+body.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+body.ltr {
+    direction: ltr;
+    text-align: left;
+}
+
+/* Immediate color fixes */
+.site-header,
+header {
+    background: var(--gradient-primary) !important;
+    color: var(--white) !important;
+}
+
+.site-title,
+.site-title a,
+h1 {
+    color: var(--secondary-color) !important;
+}
+
+.nav-tab,
+.menu-item a,
+button {
+    background: var(--gradient-primary) !important;
+    color: var(--white) !important;
+    padding: 1rem 2rem !important;
+    border-radius: var(--border-radius) !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    transition: var(--transition) !important;
+}
+
+.nav-tab:hover,
+.menu-item a:hover,
+button:hover {
+    background: var(--gradient-accent) !important;
+    transform: translateY(-2px) !important;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    color: var(--text-dark);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+
+p {
+    margin: 0 0 1rem 0;
+    color: var(--text-light);
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--secondary-color);
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background: #b8941f;
+    transform: translateY(-2px);
+}
+
+/* Cards */
+.card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    margin: 1.5rem 0;
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Grid System */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -15px;
+}
+
+.col {
+    flex: 1;
+    padding: 15px;
+}
+
+.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+.col-md-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .col-md-6,
+    .col-md-4,
+    .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+    
+    .container {
+        padding: 0 15px;
+    }
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: var(--white);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.p-1 { padding: 1rem; }
+.p-2 { padding: 2rem; }
+
+/* Print Styles */
+@media print {
+    .no-print { display: none; }
+    body { background: white; }
+    .card { box-shadow: none; border: 1px solid #ddd; }
+}
