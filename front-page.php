@@ -48,10 +48,28 @@ $event_location_en = get_post_meta($page_id, '_event_location_en', true) ?: 'Amm
 $event_description_ar = get_post_meta($page_id, '_event_subtitle_ar', true) ?: 'ملتقى علمي متخصص في الاختصاصات الصحية';
 $event_description_en = get_post_meta($page_id, '_event_subtitle_en', true) ?: 'Specialized scientific conference in health specialties';
 
+if (!function_exists('arab_board_get_pdf_proxy_url')) {
+    function arab_board_get_pdf_proxy_url($pdf_url, $day_slug = 'document') {
+        if (empty($pdf_url)) {
+            return '';
+        }
+
+        $payload = array(
+            'url' => esc_url_raw($pdf_url),
+            'day' => sanitize_title($day_slug),
+        );
+
+        $encoded = base64_encode(wp_json_encode($payload));
+
+        return trailingslashit(get_template_directory_uri()) . 'pdf-proxy.php?file=' . rawurlencode($encoded);
+    }
+}
+
 // Day 1 Data
 $day1_title_ar = 'اليوم الأول';
 $day1_title_en = 'Day 1';
 $day1_pdf = get_post_meta($page_id, '_day1_pdf', true);
+$day1_pdf_proxy = arab_board_get_pdf_proxy_url($day1_pdf, 'day-1');
 $day1_schedule = get_post_meta($page_id, '_day1_schedule', true);
 $day1_images = get_post_meta($page_id, '_day1_images', true);
 
@@ -59,6 +77,7 @@ $day1_images = get_post_meta($page_id, '_day1_images', true);
 $day2_title_ar = 'اليوم الثاني';
 $day2_title_en = 'Day 2';
 $day2_pdf = get_post_meta($page_id, '_day2_pdf', true);
+$day2_pdf_proxy = arab_board_get_pdf_proxy_url($day2_pdf, 'day-2');
 $day2_schedule = get_post_meta($page_id, '_day2_schedule', true);
 $day2_images = get_post_meta($page_id, '_day2_images', true);
 
@@ -83,13 +102,10 @@ if (!$qr_cards || !is_array($qr_cards)) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;600;700;800;900&family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PDF.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    
     <?php wp_head(); ?>
 </head>
 
-<body <?php body_class('event-page'); ?>>
+<body <?php body_class('event-page lang-ar-active'); ?>>
 
 <main id="main" class="site-main">
     
@@ -218,70 +234,33 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <?php endif; ?>
 
                 <!-- PDF Section - Full Width -->
-                <?php if ($day1_pdf) : ?>
+                <?php if ($day1_pdf_proxy) : ?>
                 <div class="pdf-section full-width">
                     <h3>
                         <span class="lang-ar">ملف PDF - <?php echo esc_html($day1_title_ar); ?></span>
                         <span class="lang-en" style="display: none;">PDF File - <?php echo esc_html($day1_title_en); ?></span>
                     </h3>
-                    
+
                     <div class="pdf-viewer">
-                        <div class="pdf-controls">
-                            <button class="pdf-btn" id="prev-page-day1">السابق</button>
-                            <span class="page-info">
-                                <span id="page-num-day1">1</span> / <span id="page-count-day1">0</span>
-                            </span>
-                            <button class="pdf-btn" id="next-page-day1">التالي</button>
-                            <button class="pdf-btn zoom-in" data-target="day1">تكبير</button>
-                            <button class="pdf-btn zoom-out" data-target="day1">تصغير</button>
-                            <a href="<?php echo esc_url($day1_pdf); ?>?download=1&t=<?php echo time(); ?>" class="pdf-btn download-btn" target="_blank" data-no-idm="true">تحميل</a>
+                        <div class="pdf-actions">
+                            <a href="<?php echo esc_url($day1_pdf_proxy . '&view=direct'); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener noreferrer">تحميل</a>
                         </div>
-                        
+
                         <div class="pdf-container">
-                            <canvas id="pdf-canvas-day1"></canvas>
-                            <iframe id="pdf-iframe-day1" style="display: none; width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px;"></iframe>
-                        </div>
-                        
-                        <div class="pdf-loading" id="pdf-loading-day1">
-                            <div class="spinner"></div>
-                            <p>جاري تحميل الملف...</p>
+                            <div class="pdf-loading" id="pdf-loading-day1">
+                                <div class="spinner"></div>
+                                <p>جاري تحميل الملف...</p>
+                            </div>
+                            <iframe
+                                id="pdf-iframe-day1"
+                                class="pdf-frame"
+                                title="<?php echo esc_attr($day1_title_ar); ?> - PDF"
+                                data-pdf-proxy="<?php echo esc_url($day1_pdf_proxy); ?>"
+                                loading="lazy"
+                                allowfullscreen>
+                            </iframe>
                         </div>
                     </div>
-                    
-                    <script>
-                        // حل بسيط ومباشر لعرض PDF
-                        jQuery(document).ready(function($) {
-                            const pdfUrl = '<?php echo $day1_pdf; ?>';
-                            const iframe = $('#pdf-iframe-day1');
-                            const loading = $('#pdf-loading-day1');
-                            const canvas = $('#pdf-canvas-day1');
-                            
-                            console.log('PDF URL for day1:', pdfUrl);
-                            
-                            if (pdfUrl && pdfUrl.trim() !== '' && iframe.length) {
-                                // إخفاء canvas واستخدام iframe
-                                canvas.hide();
-                                loading.show();
-                                
-                                // تحميل PDF في iframe
-                                iframe.attr('src', pdfUrl + '#toolbar=1&navpanes=1&scrollbar=1&view=FitH');
-                                
-                                // إظهار iframe بعد التحميل
-                                iframe.on('load', function() {
-                                    loading.hide();
-                                    iframe.show();
-                                    console.log('PDF loaded for day1');
-                                });
-                                
-                                // معالجة الأخطاء
-                                setTimeout(function() {
-                                    if (loading.is(':visible')) {
-                                        loading.html('<div style="text-align: center; padding: 2rem;"><p style="color: #d32f2f;">خطأ في تحميل PDF</p><a href="' + pdfUrl + '" target="_blank" style="background: #156b68; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">فتح في نافذة جديدة</a></div>');
-                                    }
-                                }, 5000);
-                            }
-                        });
-                    </script>
                 </div>
                 <?php endif; ?>
                 
@@ -358,70 +337,33 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <?php endif; ?>
 
                 <!-- PDF Section - Full Width -->
-                <?php if ($day2_pdf) : ?>
+                <?php if ($day2_pdf_proxy) : ?>
                 <div class="pdf-section full-width">
                     <h3>
                         <span class="lang-ar">ملف PDF - <?php echo esc_html($day2_title_ar); ?></span>
                         <span class="lang-en" style="display: none;">PDF File - <?php echo esc_html($day2_title_en); ?></span>
                     </h3>
-                    
+
                     <div class="pdf-viewer">
-                        <div class="pdf-controls">
-                            <button class="pdf-btn" id="prev-page-day2">السابق</button>
-                            <span class="page-info">
-                                <span id="page-num-day2">1</span> / <span id="page-count-day2">0</span>
-                            </span>
-                            <button class="pdf-btn" id="next-page-day2">التالي</button>
-                            <button class="pdf-btn zoom-in" data-target="day2">تكبير</button>
-                            <button class="pdf-btn zoom-out" data-target="day2">تصغير</button>
-                            <a href="<?php echo esc_url($day2_pdf); ?>?download=1&t=<?php echo time(); ?>" class="pdf-btn download-btn" target="_blank" data-no-idm="true">تحميل</a>
+                        <div class="pdf-actions">
+                            <a href="<?php echo esc_url($day2_pdf_proxy . '&view=direct'); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener noreferrer">تحميل</a>
                         </div>
-                        
+
                         <div class="pdf-container">
-                            <canvas id="pdf-canvas-day2"></canvas>
-                            <iframe id="pdf-iframe-day2" style="display: none; width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px;"></iframe>
-                        </div>
-                        
-                        <div class="pdf-loading" id="pdf-loading-day2">
-                            <div class="spinner"></div>
-                            <p>جاري تحميل الملف...</p>
+                            <div class="pdf-loading" id="pdf-loading-day2">
+                                <div class="spinner"></div>
+                                <p>جاري تحميل الملف...</p>
+                            </div>
+                            <iframe
+                                id="pdf-iframe-day2"
+                                class="pdf-frame"
+                                title="<?php echo esc_attr($day2_title_ar); ?> - PDF"
+                                data-pdf-proxy="<?php echo esc_url($day2_pdf_proxy); ?>"
+                                loading="lazy"
+                                allowfullscreen>
+                            </iframe>
                         </div>
                     </div>
-                    
-                    <script>
-                        // حل بسيط ومباشر لعرض PDF
-                        jQuery(document).ready(function($) {
-                            const pdfUrl = '<?php echo $day2_pdf; ?>';
-                            const iframe = $('#pdf-iframe-day2');
-                            const loading = $('#pdf-loading-day2');
-                            const canvas = $('#pdf-canvas-day2');
-                            
-                            console.log('PDF URL for day2:', pdfUrl);
-                            
-                            if (pdfUrl && pdfUrl.trim() !== '' && iframe.length) {
-                                // إخفاء canvas واستخدام iframe
-                                canvas.hide();
-                                loading.show();
-                                
-                                // تحميل PDF في iframe
-                                iframe.attr('src', pdfUrl + '#toolbar=1&navpanes=1&scrollbar=1&view=FitH');
-                                
-                                // إظهار iframe بعد التحميل
-                                iframe.on('load', function() {
-                                    loading.hide();
-                                    iframe.show();
-                                    console.log('PDF loaded for day2');
-                                });
-                                
-                                // معالجة الأخطاء
-                                setTimeout(function() {
-                                    if (loading.is(':visible')) {
-                                        loading.html('<div style="text-align: center; padding: 2rem;"><p style="color: #d32f2f;">خطأ في تحميل PDF</p><a href="' + pdfUrl + '" target="_blank" style="background: #156b68; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">فتح في نافذة جديدة</a></div>');
-                                    }
-                                }, 5000);
-                            }
-                        });
-                    </script>
                 </div>
                 <?php endif; ?>
                 
@@ -555,10 +497,18 @@ body {
     font-family: 'Almarai', 'Cairo', Arial, sans-serif !important;
     background: linear-gradient(135deg, #f8fafa 0%, #ffffff 100%) !important;
     color: var(--text-color) !important;
-    direction: rtl !important;
-    text-align: right !important;
     line-height: 1.6;
     font-size: 16px;
+}
+
+body.lang-ar-active {
+    direction: rtl;
+    text-align: right;
+}
+
+body.lang-en-active {
+    direction: ltr;
+    text-align: left;
 }
 
 /* Hide WordPress elements */
@@ -892,14 +842,12 @@ body {
     overflow: hidden;
 }
 
-.pdf-controls {
+.pdf-actions {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-end;
     gap: 0.8rem;
     padding: 0.8rem;
     background: var(--primary-color);
-    color: var(--white);
     flex-wrap: wrap;
 }
 
@@ -920,14 +868,6 @@ body {
     background: #b8934a;
 }
 
-.page-info {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 0.4rem 0.8rem;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
 .pdf-container {
     display: flex;
     justify-content: center;
@@ -939,14 +879,6 @@ body {
     overflow: auto;
 }
 
-.pdf-container canvas {
-    max-width: 100%;
-    height: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    box-shadow: var(--shadow);
-}
-
 .pdf-container iframe {
     width: 100%;
     height: 600px;
@@ -954,37 +886,7 @@ body {
     border-radius: 4px;
     box-shadow: var(--shadow);
     background: white;
-    /* Enhanced IDM protection */
-    pointer-events: auto;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    /* Hide from download detection */
-    content-visibility: auto;
-    opacity: 0.999; /* Trick IDM detection */
-    filter: blur(0px) brightness(1.001); /* Subtle filter to confuse IDM */
-    /* Additional protection */
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
-    /* Block contextmenu and selection */
-    -webkit-context-menu: none;
-    -moz-context-menu: none;
-    context-menu: none;
-}
-
-/* Hide iframe from IDM when it's loading */
-.pdf-container iframe[data-anti-idm="true"] {
-    visibility: visible !important;
-    display: block !important;
-    transform: scale(1.0001); /* Microscopic transform to avoid detection */
-}
-
-/* Prevent IDM overlay detection */
-.pdf-container iframe::before,
-.pdf-container iframe::after {
-    content: none !important;
-    display: none !important;
+    transition: opacity 0.3s ease;
 }
 
 .pdf-loading {
@@ -994,6 +896,10 @@ body {
     gap: 1rem;
     color: var(--primary-color);
     padding: 2rem;
+}
+
+.pdf-loading.hidden {
+    display: none !important;
 }
 
 .spinner {
@@ -1498,523 +1404,224 @@ body.ar-active .lang-en[style*="display: block"] {
         bottom: 1rem;
         left: 1rem;
     }
-    
+
     .fab {
         width: 40px;
         height: 40px;
         font-size: 1rem;
     }
+
+    .pdf-actions {
+        justify-content: center;
+    }
 }
 </style>
 
 <!-- JavaScript -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-// Configure PDF.js with better error handling
-if (typeof pdfjsLib !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    
-    // Disable web workers if they cause issues
-    pdfjsLib.GlobalWorkerOptions.workerPort = null;
-    
-    // Set up better CORS handling
-    pdfjsLib.getDocument.prototype.httpHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type'
-    };
-    
-    console.log('PDF.js configured successfully');
-} else {
-    console.error('PDF.js library not loaded!');
-}
+document.addEventListener('DOMContentLoaded', function() {
+    var body = document.body;
+    var langButtons = document.querySelectorAll('.lang-btn');
+    var langArElements = document.querySelectorAll('.lang-ar');
+    var langEnElements = document.querySelectorAll('.lang-en');
 
-jQuery(document).ready(function($) {
-    // حل مبسط وعملي لتبديل اللغة
-    $('#lang-ar').click(function() {
-        console.log('تبديل إلى العربية');
-        
-        // تغيير حالة الأزرار
-        $('.lang-btn').removeClass('active');
-        $(this).addClass('active');
-        
-        // إخفاء الإنجليزية وإظهار العربية
-        $('.lang-en').hide();
-        $('.lang-ar').show();
-        
-        // تغيير اتجاه الصفحة
-        $('body').css('direction', 'rtl').css('text-align', 'right');
-        
-        console.log('تم التبديل إلى العربية');
-    });
-    
-    $('#lang-en').click(function() {
-        console.log('Switch to English');
-        
-        // تغيير حالة الأزرار
-        $('.lang-btn').removeClass('active');
-        $(this).addClass('active');
-        
-        // إخفاء العربية وإظهار الإنجليزية
-        $('.lang-ar').hide();
-        $('.lang-en').show();
-        
-        // تغيير اتجاه الصفحة
-        $('body').css('direction', 'ltr').css('text-align', 'left');
-        
-        console.log('Switched to English');
-    });
-    
-    // تعيين اللغة الافتراضية - العربية
-    $('.lang-ar').show();
-    $('.lang-en').hide();
-    $('#lang-ar').addClass('active');
-    
-    // Navigation tabs
-    $('.nav-tab').on('click', function(e) {
-        e.preventDefault();
-        var target = $(this).attr('href');
-        
-        $('.nav-tab').removeClass('active');
-        $(this).addClass('active');
-        
-        $('html, body').animate({
-            scrollTop: $(target).offset().top - 100
-        }, 500);
-    });
-    
-    // Image lightbox
-    $('.image-item').on('click', function() {
-        var imgSrc = $(this).find('img').attr('src');
-        $('#lightbox-image').attr('src', imgSrc);
-        $('#lightbox').addClass('active');
-    });
-    
-    $('.lightbox-close, #lightbox').on('click', function(e) {
-        if (e.target === this) {
-            $('#lightbox').removeClass('active');
-        }
-    });
-    
-    // Floating actions
-    $('.scroll-top-btn').on('click', function() {
-        $('html, body').animate({scrollTop: 0}, 500);
-    });
-    
-    $('.print-btn').on('click', function() {
-        window.print();
-    });
-    
-    $('.share-btn').on('click', function() {
-        if (navigator.share) {
-            navigator.share({
-                title: document.title,
-                url: window.location.href
+    function activateLanguage(lang) {
+        var isArabic = lang === 'ar';
+        body.classList.toggle('lang-ar-active', isArabic);
+        body.classList.toggle('lang-en-active', !isArabic);
+
+        langButtons.forEach(function(btn) {
+            btn.classList.toggle('active', btn.id === 'lang-' + lang);
+        });
+
+        langArElements.forEach(function(el) {
+            el.style.display = isArabic ? '' : 'none';
+        });
+
+        langEnElements.forEach(function(el) {
+            el.style.display = isArabic ? 'none' : '';
+        });
+    }
+
+    var langArBtn = document.getElementById('lang-ar');
+    var langEnBtn = document.getElementById('lang-en');
+
+    if (langArBtn) {
+        langArBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            activateLanguage('ar');
+        });
+    }
+
+    if (langEnBtn) {
+        langEnBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            activateLanguage('en');
+        });
+    }
+
+    activateLanguage('ar');
+
+    document.querySelectorAll('.nav-tab').forEach(function(tab) {
+        tab.addEventListener('click', function(event) {
+            event.preventDefault();
+            var targetSelector = tab.getAttribute('href');
+
+            document.querySelectorAll('.nav-tab').forEach(function(other) {
+                other.classList.toggle('active', other === tab);
             });
-        } else {
-            navigator.clipboard.writeText(window.location.href);
-            alert('تم نسخ الرابط');
-        }
-    });
-    
-    // حل بسيط وعملي لعرض PDF
-    console.log('تهيئة عارض PDF البسيط...');
-    
-    // وظيفة بسيطة لتحميل PDF في iframe
-    function loadSimplePDF(day, pdfUrl) {
-        console.log('تحميل PDF لليوم:', day, 'الرابط:', pdfUrl);
-        
-        const iframe = document.getElementById('pdf-iframe-' + day);
-        const loading = document.getElementById('pdf-loading-' + day);
-        const canvas = document.getElementById('pdf-canvas-' + day);
-        
-        if (!iframe || !pdfUrl) {
-            console.error('عنصر iframe غير موجود أو لا يوجد رابط PDF');
-            return;
-        }
-        
-        // إخفاء canvas وإظهار loading
-        if (canvas) canvas.style.display = 'none';
-        if (loading) loading.style.display = 'flex';
-        
-        // تحميل PDF في iframe مباشرة
-        iframe.src = pdfUrl + '#toolbar=1&navpanes=1&scrollbar=1&view=FitH';
-        
-        // معالجة التحميل الناجح
-        iframe.onload = function() {
-            console.log('تم تحميل PDF بنجاح لليوم:', day);
-            if (loading) loading.style.display = 'none';
-            iframe.style.display = 'block';
-        };
-        
-        // معالجة الأخطاء
-        iframe.onerror = function() {
-            console.error('خطأ في تحميل PDF لليوم:', day);
-            if (loading) {
-                loading.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <p style="color: #d32f2f; font-weight: bold; margin-bottom: 1rem;">لا يمكن عرض ملف PDF في المتصفح</p>
-                        <p style="color: #666; margin-bottom: 1rem; font-size: 0.9em;">قد يكون السبب: الملف محمي، مشكلة في الشبكة، أو إعدادات المتصفح</p>
-                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                            <a href="${pdfUrl}" target="_blank" style="background: #156b68; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-weight: bold;">📄 تحميل الملف</a>
-                            <button onclick="loadTestContent('${day}')" style="background: #caa453; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">📋 عرض محتوى تجريبي</button>
-                            <button onclick="location.reload()" style="background: #666; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">🔄 إعادة المحاولة</button>
-                        </div>
-                    </div>
-                `;
-            }
-        };
-        
-        // Timeout للكشف عن المشاكل
-        setTimeout(function() {
-            if (loading && loading.style.display !== 'none') {
-                console.warn('تحميل PDF يستغرق وقتاً طويلاً لليوم:', day);
-                iframe.style.display = 'block';
-                loading.style.display = 'none';
-            }
-        }, 5000);
-    }
-    
-    // وظيفة تحميل المحتوى التجريبي
-    window.loadTestContent = function(day) {
-        console.log('تحميل محتوى تجريبي لليوم:', day);
-        const iframe = document.getElementById('pdf-iframe-' + day);
-        const loading = document.getElementById('pdf-loading-' + day);
-        
-        if (iframe && loading) {
-            loading.style.display = 'none';
-            iframe.src = 'test-pdf-content.html';
-            iframe.style.display = 'block';
-            console.log('تم تحميل المحتوى التجريبي بنجاح');
-        }
-    };
-    
-    // تهيئة PDF البسيطة - حذف جميع التعقيدات
-    console.log('تم حذف جميع التعقيدات - استخدام حل بسيط');
-    function debugPDFSetup() {
-        console.log('=== PDF Debug Information ===');
-        console.log('PDF.js available:', typeof pdfjsLib !== 'undefined');
-        console.log('Window.pdfFiles available:', typeof window.pdfFiles !== 'undefined');
-        
-        if (typeof window.pdfFiles !== 'undefined') {
-            console.log('PDF files:', window.pdfFiles);
-            for (let day in window.pdfFiles) {
-                const url = window.pdfFiles[day];
-                console.log(`${day} PDF URL:`, url);
-                
-                // For localhost, don't try fetch (will fail due to CORS)
-                if (url.includes('localhost') || url.includes('127.0.0.1')) {
-                    console.log(`${day} PDF: localhost detected, will use iframe directly`);
-                } else {
-                    // Test if URL is accessible for external URLs
-                    fetch(url, { method: 'HEAD' })
-                        .then(response => {
-                            console.log(`${day} PDF accessibility:`, response.ok ? 'OK' : 'FAILED');
-                            console.log(`${day} PDF status:`, response.status);
-                        })
-                        .catch(error => {
-                            console.error(`${day} PDF fetch error:`, error.message);
-                        });
-                }
-            }
-        } else {
-            console.log('No PDF files configured');
-        }
-        console.log('=== End PDF Debug ===');
-    }
-    
-    // Prevent IDM from intercepting PDF links
-    function preventIDMInterception() {
-        // Override XMLHttpRequest to add headers that prevent IDM detection
-        const originalXHROpen = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-            if (url && url.includes('.pdf')) {
-                console.log('Protecting PDF request from IDM:', url);
-            }
-            return originalXHROpen.apply(this, arguments);
-        };
-        
-        const originalXHRSend = XMLHttpRequest.prototype.send;
-        XMLHttpRequest.prototype.send = function(data) {
-            if (this._url && this._url.includes('.pdf')) {
-                this.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-                this.setRequestHeader('Content-Type', 'application/pdf');
-                this.setRequestHeader('Cache-Control', 'no-cache');
-            }
-            return originalXHRSend.apply(this, arguments);
-        };
-        
-        // Override fetch for PDF requests
-        const originalFetch = window.fetch;
-        window.fetch = function(url, options = {}) {
-            if (url && url.includes('.pdf')) {
-                console.log('Protecting PDF fetch from IDM:', url);
-                options.headers = options.headers || {};
-                options.headers['X-Requested-With'] = 'XMLHttpRequest';
-                options.headers['Content-Type'] = 'application/pdf';
-                options.headers['Cache-Control'] = 'no-cache';
-                options.mode = 'cors';
-                options.credentials = 'omit';
-            }
-            return originalFetch.apply(this, arguments);
-        };
-    }
-    
-    // Enhanced IDM protection
-    function enhancedIDMProtection() {
-        // Block IDM from detecting PDF links
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList') {
-                    const pdfLinks = document.querySelectorAll('a[href*=".pdf"], iframe[src*=".pdf"]');
-                    pdfLinks.forEach(function(element) {
-                        element.setAttribute('data-no-idm', 'true');
-                        element.style.pointerEvents = 'auto';
-                        if (element.tagName === 'IFRAME') {
-                            element.oncontextmenu = function(e) { e.preventDefault(); };
-                        }
+
+            if (targetSelector) {
+                var target = document.querySelector(targetSelector);
+                if (target) {
+                    window.scrollTo({
+                        top: target.getBoundingClientRect().top + window.pageYOffset - 100,
+                        behavior: 'smooth'
                     });
                 }
-            });
-        });
-        
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-        
-        // Override document.createElement to protect dynamically created elements
-        const originalCreateElement = document.createElement;
-        document.createElement = function(tagName) {
-            const element = originalCreateElement.call(this, tagName);
-            if (tagName.toLowerCase() === 'iframe') {
-                element.setAttribute('data-anti-idm', 'true');
-                element.oncontextmenu = function(e) { e.preventDefault(); };
-            }
-            return element;
-        };
-        
-        // Disable right-click on PDF elements
-        document.addEventListener('contextmenu', function(e) {
-            if (e.target.closest('[data-no-idm], .pdf-container, .pdf-viewer')) {
-                e.preventDefault();
-                return false;
             }
         });
-        
-        // Block drag and drop on PDF elements
-        document.addEventListener('dragstart', function(e) {
-            if (e.target.closest('[data-no-idm], .pdf-container, .pdf-viewer')) {
-                e.preventDefault();
-                return false;
+    });
+
+    document.querySelectorAll('.image-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            var img = item.querySelector('img');
+            if (img) {
+                document.getElementById('lightbox-image').setAttribute('src', img.getAttribute('src'));
+                document.getElementById('lightbox').classList.add('active');
             }
         });
-        
-        // Ultimate IDM blocker - intercept any external download attempts
-        Object.defineProperty(window, 'external', {
-            value: null,
-            writable: false,
-            configurable: false
-        });
-        
-        // Block IDM browser helpers
-        if (window.chrome && window.chrome.webstore) {
-            delete window.chrome.webstore;
-        }
-        
-        // Disable IDM keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Block Ctrl+S, Ctrl+D, Alt+Click on PDF areas
-            if (e.target.closest('.pdf-container, .pdf-viewer')) {
-                if ((e.ctrlKey && (e.key === 's' || e.key === 'd')) || 
-                    (e.altKey && e.type === 'click')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('IDM shortcut blocked');
-                    return false;
-                }
+    });
+
+    document.querySelectorAll('.lightbox-close, #lightbox').forEach(function(element) {
+        element.addEventListener('click', function(event) {
+            if (event.target === element) {
+                document.getElementById('lightbox').classList.remove('active');
             }
         });
-        
-        // Monitor and block any IDM injected elements
-        const idmBlocker = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                mutation.addedNodes.forEach(function(node) {
-                    if (node.nodeType === 1) { // Element node
-                        // Check for IDM-like elements and remove them
-                        if (node.className && typeof node.className === 'string') {
-                            if (node.className.includes('idm') || 
-                                node.className.includes('download') ||
-                                node.className.includes('IDM')) {
-                                console.log('Removing IDM element:', node);
-                                node.remove();
-                            }
-                        }
-                        
-                        // Check for IDM overlay divs
-                        if (node.style && node.style.position === 'absolute' && 
-                            node.style.zIndex > 1000) {
-                            const rect = node.getBoundingClientRect();
-                            const pdfContainers = document.querySelectorAll('.pdf-container');
-                            pdfContainers.forEach(function(container) {
-                                const containerRect = container.getBoundingClientRect();
-                                if (rect.left < containerRect.right && 
-                                    rect.right > containerRect.left &&
-                                    rect.top < containerRect.bottom && 
-                                    rect.bottom > containerRect.top) {
-                                    console.log('Removing IDM overlay:', node);
-                                    node.remove();
-                                }
-                            });
-                        }
-                    }
-                });
-            });
-        });
-        
-        idmBlocker.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['class', 'style']
+    });
+
+    var scrollTopBtn = document.querySelector('.scroll-top-btn');
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
-    
-    // Initialize all IDM protections
-    preventIDMInterception();
-    enhancedIDMProtection();
-    
-    // Initialize PDF viewers using protected proxy
-    console.log('Initializing protected PDF viewers...');
-    
-    setTimeout(function() {
-        if (typeof window.pdfFiles !== 'undefined' && Object.keys(window.pdfFiles).length > 0) {
-            console.log('Protected PDF files found:', Object.keys(window.pdfFiles));
-            
-            for (let day in window.pdfFiles) {
-                const iframe = document.getElementById('pdf-iframe-' + day);
-                const loading = document.getElementById('pdf-loading-' + day);
-                const canvas = document.getElementById('pdf-canvas-' + day);
-                
-                if (iframe && loading) {
-                    console.log('Initializing protected PDF for:', day);
-                    
-                    // إخفاء canvas واستخدام iframe فقط
-                    if (canvas) canvas.style.display = 'none';
-                    
-                    // تحميل PDF المحمي
-                    loading.style.display = 'flex';
-                    iframe.style.display = 'none';
-                    
-                    // استخدام الـ proxy المحمي
-                    iframe.src = window.pdfFiles[day];
-                    iframe.setAttribute('data-protected-pdf', 'true');
-                    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups');
-                    
-                    // إعداد معالجات الأحداث
-                    iframe.onload = function() {
-                        console.log('Protected PDF loaded successfully for', day, 'URL:', window.pdfFiles[day]);
-                        loading.style.display = 'none';
-                        iframe.style.display = 'block';
-                        
-                        // إضافة رسالة نجاح
-                        setTimeout(function() {
-                            const successMsg = document.createElement('div');
-                            successMsg.innerHTML = '<div style=\"background: #4caf50; color: white; padding: 0.5rem; text-align: center; border-radius: 4px; margin-bottom: 0.5rem;\">تم تحميل المستند بنجاح ✓</div>';
-                            iframe.parentNode.insertBefore(successMsg, iframe);
-                            setTimeout(() => successMsg.remove(), 3000);
-                        }, 100);
-                    };
-                    
-                    iframe.onerror = function() {
-                        console.error('Protected PDF failed for', day, 'URL:', window.pdfFiles[day]);
-                        loading.innerHTML = '<div style=\"color: #d32f2f; text-align: center; padding: 2rem; background: #ffebee; border-radius: 8px; border: 1px solid #ffcdd2;\"><p style=\"font-weight: bold; margin-bottom: 0.5rem;\">خطأ في تحميل المستند</p><p style=\"font-size: 0.9em; color: #666; margin-bottom: 1rem;\">تحقق من إعدادات الملفات أو اتصال الإنترنت</p><button onclick=\"location.reload()\" style=\"background: #156b68; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;\">إعادة المحاولة</button><br><small style=\"margin-top: 1rem; display: block; color: #999;\">Day: ' + day + '</small></div>';
-                    };
-                    
-                    // إضافة timeout للكشف عن المشاكل
-                    setTimeout(function() {
-                        if (loading.style.display !== 'none') {
-                            console.warn('PDF loading taking too long for', day);
-                            loading.innerHTML = '<div style=\"color: #ff9800; text-align: center; padding: 2rem;\"><div class=\"spinner\"></div><p>التحميل يستغرق وقتاً أطول من المعتاد...</p><p style=\"font-size: 0.8em; color: #666;\">إذا استمر التحميل، جرب إعادة تحميل الصفحة</p></div>';
-                        }
-                    }, 10000); // 10 seconds timeout
-                    
-                    // إخفاء أزرار التنقل لأن الـ proxy يتولى العرض
-                    const controls = document.querySelector('#' + day.replace('day', 'day') + ' .pdf-controls');
-                    if (controls) {
-                        const buttons = controls.querySelectorAll('.pdf-btn:not(.download-btn)');\n                        buttons.forEach(btn => btn.style.display = 'none');
-                    }
-                } else {
-                    console.error('Missing elements for protected PDF:', day);
-                }
+
+    var printBtn = document.querySelector('.print-btn');
+    if (printBtn) {
+        printBtn.addEventListener('click', function() {
+            window.print();
+        });
+    }
+
+    var shareBtn = document.querySelector('.share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.title,
+                    url: window.location.href
+                });
+            } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(window.location.href).then(function() {
+                    alert('تم نسخ الرابط');
+                });
             }
-        } else {
-            console.log('No protected PDF files configured');
-        }
-    }, 300);
-    
-    // Enhanced protection for download links from IDM
-    $('.download-btn[data-no-idm]').on('click', function(e) {
-        e.preventDefault();
-        const link = this;
-        const originalHref = link.href;
-        
-        // Create dynamic anti-IDM URL
-        const antiIdmParams = [
-            'viewer=browser',
-            'display=inline', 
-            'content-disposition=inline',
-            'x-download=false',
-            'embed=true',
-            'nodownload=1',
-            'browser-view=1',
-            'anti-idm=' + Math.random().toString(36).substring(7),
-            't=' + Date.now()
-        ].join('&');
-        
-        const protectedUrl = originalHref + (originalHref.includes('?') ? '&' : '?') + antiIdmParams;
-        
-        // Open in new window with specific features to avoid IDM
-        const newWindow = window.open('', '_blank', 'width=1000,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no');
-        if (newWindow) {
-            newWindow.document.write(`
-                <html>
-                    <head>
-                        <title>PDF Viewer</title>
-                        <style>
-                            body { margin: 0; padding: 0; }
-                            iframe { width: 100%; height: 100vh; border: none; }
-                        </style>
-                    </head>
-                    <body>
-                        <iframe src="${protectedUrl}#toolbar=1&navpanes=1&scrollbar=1" 
-                                data-no-download="true" 
-                                data-anti-idm="true"
-                                sandbox="allow-same-origin allow-scripts allow-forms">
-                        </iframe>
-                    </body>
-                </html>
-            `);
-            newWindow.document.close();
-        } else {
-            // Fallback: direct link
-            window.location.href = protectedUrl;
-        }
+        });
+    }
+
+    document.querySelectorAll('.qr-share-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var url = button.getAttribute('data-url');
+            var title = button.getAttribute('data-title-ar') || document.title;
+
+            if (!url) {
+                return;
+            }
+
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: url
+                });
+            } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function() {
+                    alert('تم نسخ الرابط');
+                });
+            }
+        });
     });
-    
-    // QR share buttons
-    $('.qr-share-btn').on('click', function() {
-        var url = $(this).data('url');
-        var title = $(this).data('title-ar');
-        
-        if (navigator.share) {
-            navigator.share({
-                title: title,
-                url: url
+
+    document.querySelectorAll('.pdf-frame').forEach(function(frame) {
+        var proxyUrl = frame.getAttribute('data-pdf-proxy');
+        var container = frame.closest('.pdf-container');
+        var loading = container ? container.querySelector('.pdf-loading') : null;
+
+        if (!proxyUrl) {
+            if (loading) {
+                loading.classList.add('error');
+                loading.innerHTML = '<p>ملف PDF غير متوفر.</p>';
+            }
+            return;
+        }
+
+        frame.addEventListener('load', function() {
+            if (loading) {
+                loading.classList.add('hidden');
+                loading.style.display = 'none';
+            }
+            frame.classList.add('is-ready');
+        });
+
+        frame.addEventListener('error', function() {
+            if (loading) {
+                loading.classList.add('error');
+                loading.innerHTML = '<p>تعذر تحميل ملف PDF.</p>';
+            }
+        });
+
+        frame.setAttribute('src', proxyUrl);
+    });
+
+    document.querySelectorAll('.images-gallery').forEach(function(gallery) {
+        var items = gallery.querySelectorAll('.image-item');
+        var currentIndex = 0;
+
+        function showImage(index) {
+            if (index < 0 || index >= items.length) {
+                return;
+            }
+
+            var img = items[index].querySelector('img');
+            if (img) {
+                document.getElementById('lightbox-image').setAttribute('src', img.getAttribute('src'));
+                document.getElementById('lightbox').classList.add('active');
+                currentIndex = index;
+            }
+        }
+
+        items.forEach(function(item, index) {
+            item.addEventListener('click', function() {
+                showImage(index);
             });
-        } else {
-            navigator.clipboard.writeText(url);
-            alert('تم نسخ الرابط');
+        });
+
+        var prevBtn = document.querySelector('.lightbox-prev');
+        var nextBtn = document.querySelector('.lightbox-next');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function(event) {
+                event.stopPropagation();
+                showImage(currentIndex - 1);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function(event) {
+                event.stopPropagation();
+                showImage(currentIndex + 1);
+            });
         }
     });
 });
