@@ -85,6 +85,112 @@ if (!$qr_cards || !is_array($qr_cards)) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;600;700;800;900&family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- JavaScript Functions - تحميل مبكر لضمان العمل -->
+    <script>
+    // تبديل اللغة - كود بسيط وفعال  
+    function switchLanguage(lang) {
+        console.log('🔄 تبديل اللغة إلى:', lang);
+        
+        // إزالة active من جميع الأزرار
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // إضافة active للزر المحدد
+        document.getElementById('lang-' + lang).classList.add('active');
+        
+        // إظهار/إخفاء المحتوى
+        if (lang === 'ar') {
+            // عرض العربية وإخفاء الإنجليزية
+            document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'block');
+            document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'none');
+            document.body.setAttribute('dir', 'rtl');
+            document.documentElement.setAttribute('dir', 'rtl');
+            document.documentElement.setAttribute('lang', 'ar');
+        } else {
+            // عرض الإنجليزية وإخفاء العربية
+            document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'block');
+            document.body.setAttribute('dir', 'ltr');
+            document.documentElement.setAttribute('dir', 'ltr');
+            document.documentElement.setAttribute('lang', 'en');
+        }
+        
+        // حفظ التفضيل
+        try {
+            localStorage.setItem('selectedLang', lang);
+        } catch(e) {
+            console.log('تعذر حفظ اللغة');
+        }
+    }
+
+    // عارض PDF محسن يعمل مع نظام proxy
+    function openPDF(pdfUrl, title) {
+        console.log('📄 فتح PDF:', title);
+        console.log('🔗 الرابط:', pdfUrl);
+        
+        if (!pdfUrl) {
+            alert('رابط PDF غير متوفر');
+            return;
+        }
+        
+        // إظهار رسالة تحميل
+        const loadingMsg = document.createElement('div');
+        loadingMsg.innerHTML = `
+            <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+                        background:rgba(0,0,0,0.8);color:white;padding:20px;border-radius:8px;
+                        z-index:10000;text-align:center;">
+                <div style="margin-bottom:10px;">🔄 جاري فتح الملف...</div>
+                <div style="font-size:12px;opacity:0.8;">إذا لم يفتح الملف، تحقق من إعدادات حجب النوافذ المنبثقة</div>
+            </div>
+        `;
+        document.body.appendChild(loadingMsg);
+        
+        // إزالة رسالة التحميل بعد 3 ثوان
+        setTimeout(() => {
+            if (loadingMsg.parentNode) {
+                loadingMsg.parentNode.removeChild(loadingMsg);
+            }
+        }, 3000);
+        
+        // فتح PDF في نافذة جديدة
+        const pdfWindow = window.open(
+            pdfUrl,
+            'pdfViewer_' + Date.now(),
+            'width=1200,height=800,scrollbars=yes,resizable=yes,menubar=yes,toolbar=yes,location=yes'
+        );
+        
+        if (!pdfWindow) {
+            // إذا تم حجب النافذة المنبثقة، استخدم رابط مباشر
+            if (confirm('لا يمكن فتح نافذة جديدة. هل تريد الانتقال للملف في النافذة الحالية؟')) {
+                window.location.href = pdfUrl;
+            }
+        } else {
+            // التحقق من أن النافذة فتحت بنجاح
+            setTimeout(() => {
+                if (pdfWindow.closed) {
+                    console.log('⚠️ تم إغلاق النافذة بسرعة - قد يكون هناك مشكلة');
+                }
+            }, 1000);
+        }
+    }
+
+    // إعداد اللغة عند التحميل
+    window.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ تم تحميل الصفحة - إعداد اللغة');
+        
+        // قراءة اللغة المحفوظة أو استخدام العربية كافتراضي
+        let savedLang = 'ar';
+        try {
+            savedLang = localStorage.getItem('selectedLang') || 'ar';
+        } catch(e) {
+            console.log('استخدام اللغة الافتراضية: العربية');
+        }
+        
+        switchLanguage(savedLang);
+    });
+    </script>
+    
     <?php wp_head(); ?>
 </head>
 
@@ -1401,66 +1507,7 @@ body.ar-active .lang-en[style*="display: block"] {
 }
 </style>
 
-<!-- Simple JavaScript -->
-<script>
-// تبديل اللغة - كود بسيط وفعال
-function switchLanguage(lang) {
-    console.log('🔄 تبديل اللغة إلى:', lang);
-    
-    // إزالة active من جميع الأزرار
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // إضافة active للزر المحدد
-    document.getElementById('lang-' + lang).classList.add('active');
-    
-    // إظهار/إخفاء المحتوى
-    if (lang === 'ar') {
-        // عرض العربية وإخفاء الإنجليزية
-        document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'block');
-        document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'none');
-        document.body.setAttribute('dir', 'rtl');
-        document.documentElement.setAttribute('dir', 'rtl');
-        document.documentElement.setAttribute('lang', 'ar');
-    } else {
-        // عرض الإنجليزية وإخفاء العربية
-        document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'block');
-        document.body.setAttribute('dir', 'ltr');
-        document.documentElement.setAttribute('dir', 'ltr');
-        document.documentElement.setAttribute('lang', 'en');
-    }
-    
-    // حفظ التفضيل
-    try {
-        localStorage.setItem('selectedLang', lang);
-    } catch(e) {
-        console.log('تعذر حفظ اللغة');
-    }
-}
-
-// إعداد اللغة عند التحميل
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ تم تحميل الصفحة - إعداد اللغة');
-    
-    // قراءة اللغة المحفوظة أو استخدام العربية كافتراضي
-    let savedLang = 'ar';
-    try {
-        savedLang = localStorage.getItem('selectedLang') || 'ar';
-    } catch(e) {
-        console.log('استخدام اللغة الافتراضية: العربية');
-    }
-    
-    switchLanguage(savedLang);
-});
-
-// عارض PDF محسن يعمل مع نظام proxy
-function openPDF(pdfUrl, title) {
-    console.log('📄 فتح PDF:', title);
-    console.log('🔗 الرابط:', pdfUrl);
-    
-    if (!pdfUrl) {
+<!-- الـ JavaScript متوفر في <head> -->
         alert('رابط PDF غير متوفر');
         return;
     }
@@ -1606,13 +1653,7 @@ function openPDF(pdfUrl, title) {
                 '<div style="text-align:center; padding:1.5rem;">' +
                 '<p style="color:#d32f2f; margin-bottom:0.75rem;">تعذر عرض ملف PDF.</p>' +
                 '<a href="' + originalUrl + '" target="_blank" rel="noopener" ' +
-                'style="background:#156b68; color:#fff; padding:0.5rem 1rem; border-radius:4px; display:inline-block;">فتح الملف في نافذة جديدة</a>' +
-                '</div>'
-            );
-        });
-    });
-});
-</script>
+<!-- تم نقل JavaScript إلى <head> لضمان التحميل المبكر -->
 
 <?php wp_footer(); ?>
 </body>
