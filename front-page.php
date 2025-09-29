@@ -226,8 +226,13 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
-                            <button onclick="openPDF('<?php echo esc_url($day1_pdf); ?>', '<?php echo esc_js($day1_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
-                            <a href="<?php echo esc_url($day1_pdf); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
+                            <?php 
+                            // إنشاء روابط proxy صحيحة
+                            $day1_proxy_view = arab_board_2025_get_protected_pdf_url($day1_pdf, 'day1') . '&view=direct';
+                            $day1_proxy_download = arab_board_2025_get_protected_pdf_url($day1_pdf, 'day1') . '&download=1';
+                            ?>
+                            <button onclick="openPDF('<?php echo esc_url($day1_proxy_view); ?>', '<?php echo esc_js($day1_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
+                            <a href="<?php echo esc_url($day1_proxy_download); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
                         </div>
 
                         <div class="pdf-container">
@@ -322,8 +327,13 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
-                            <button onclick="openPDF('<?php echo esc_url($day2_pdf); ?>', '<?php echo esc_js($day2_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
-                            <a href="<?php echo esc_url($day2_pdf); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
+                            <?php 
+                            // إنشاء روابط proxy صحيحة
+                            $day2_proxy_view = arab_board_2025_get_protected_pdf_url($day2_pdf, 'day2') . '&view=direct';
+                            $day2_proxy_download = arab_board_2025_get_protected_pdf_url($day2_pdf, 'day2') . '&download=1';
+                            ?>
+                            <button onclick="openPDF('<?php echo esc_url($day2_proxy_view); ?>', '<?php echo esc_js($day2_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
+                            <a href="<?php echo esc_url($day2_proxy_download); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
                         </div>
 
                         <div class="pdf-container">
@@ -1445,25 +1455,54 @@ window.addEventListener('DOMContentLoaded', function() {
     switchLanguage(savedLang);
 });
 
-// عارض PDF بسيط
+// عارض PDF محسن يعمل مع نظام proxy
 function openPDF(pdfUrl, title) {
     console.log('📄 فتح PDF:', title);
+    console.log('🔗 الرابط:', pdfUrl);
     
     if (!pdfUrl) {
         alert('رابط PDF غير متوفر');
         return;
     }
     
+    // إظهار رسالة تحميل
+    const loadingMsg = document.createElement('div');
+    loadingMsg.innerHTML = `
+        <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+                    background:rgba(0,0,0,0.8);color:white;padding:20px;border-radius:8px;
+                    z-index:10000;text-align:center;">
+            <div style="margin-bottom:10px;">🔄 جاري فتح الملف...</div>
+            <div style="font-size:12px;opacity:0.8;">إذا لم يفتح الملف، تحقق من إعدادات حجب النوافذ المنبثقة</div>
+        </div>
+    `;
+    document.body.appendChild(loadingMsg);
+    
+    // إزالة رسالة التحميل بعد 3 ثوان
+    setTimeout(() => {
+        if (loadingMsg.parentNode) {
+            loadingMsg.parentNode.removeChild(loadingMsg);
+        }
+    }, 3000);
+    
     // فتح PDF في نافذة جديدة
     const pdfWindow = window.open(
         pdfUrl,
-        'pdfViewer',
-        'width=1000,height=700,scrollbars=yes,resizable=yes,menubar=no,toolbar=yes'
+        'pdfViewer_' + Date.now(),
+        'width=1200,height=800,scrollbars=yes,resizable=yes,menubar=yes,toolbar=yes,location=yes'
     );
     
     if (!pdfWindow) {
         // إذا تم حجب النافذة المنبثقة، استخدم رابط مباشر
-        window.location.href = pdfUrl;
+        if (confirm('لا يمكن فتح نافذة جديدة. هل تريد الانتقال للملف في النافذة الحالية؟')) {
+            window.location.href = pdfUrl;
+        }
+    } else {
+        // التحقق من أن النافذة فتحت بنجاح
+        setTimeout(() => {
+            if (pdfWindow.closed) {
+                console.log('⚠️ تم إغلاق النافذة بسرعة - قد يكون هناك مشكلة');
+            }
+        }, 1000);
     }
 }
 

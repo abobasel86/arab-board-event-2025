@@ -51,6 +51,46 @@ $unique_id = uniqid('pdf_', true);
 header('X-Request-ID: ' . $unique_id);
 header('X-Content-Source: embedded');
 
+// إذا كان الطلب للتحميل
+if (isset($_GET['download']) && $_GET['download'] === '1') {
+    // تحديد نوع المحتوى للتحميل
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="document_' . $day . '.pdf"');
+    
+    // إنشاء context للطلب مع Headers مخفية
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => [
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language: ar,en-US;q=0.7,en;q=0.3',
+                'Accept-Encoding: identity',
+                'DNT: 1',
+                'Connection: keep-alive',
+                'Upgrade-Insecure-Requests: 1',
+                'Sec-Fetch-Dest: document',
+                'Sec-Fetch-Mode: navigate',
+                'Sec-Fetch-Site: cross-site'
+            ],
+            'timeout' => 30,
+            'ignore_errors' => true
+        ]
+    ]);
+    
+    // جلب الملف وإرساله
+    $file_content = file_get_contents($pdf_url, false, $context);
+    
+    if ($file_content === false) {
+        http_response_code(404);
+        die('لا يمكن الوصول للملف');
+    }
+    
+    // إرسال المحتوى
+    echo $file_content;
+    exit;
+}
+
 // إذا كان الطلب لعرض مباشر
 if (isset($_GET['view']) && $_GET['view'] === 'direct') {
     // تحديد نوع المحتوى
