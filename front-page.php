@@ -431,10 +431,18 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 <p class="lang-ar">جاري تحميل الملف...</p>
                                 <p class="lang-en" style="display: none;">Loading file...</p>
                             </div>
+                            <?php 
+                            // إنشاء رابط proxy يمنع IDM
+                            $day1_proxy_url = add_query_arg(array(
+                                'pdf_viewer' => '1',
+                                'file' => base64_encode($day1_pdf),
+                                'day' => 'day1'
+                            ), get_template_directory_uri() . '/pdf-viewer.php');
+                            ?>
                             <iframe
                                 id="pdf-iframe-day1"
                                 class="pdf-frame"
-                                src="<?php echo esc_url($day1_pdf); ?>"
+                                src="<?php echo esc_url($day1_proxy_url); ?>"
                                 title="<?php echo esc_attr($day1_title_ar); ?> - PDF"
                                 width="100%"
                                 height="600"
@@ -548,10 +556,18 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 <p class="lang-ar">جاري تحميل الملف...</p>
                                 <p class="lang-en" style="display: none;">Loading file...</p>
                             </div>
+                            <?php 
+                            // إنشاء رابط proxy يمنع IDM
+                            $day2_proxy_url = add_query_arg(array(
+                                'pdf_viewer' => '1',
+                                'file' => base64_encode($day2_pdf),
+                                'day' => 'day2'
+                            ), get_template_directory_uri() . '/pdf-viewer.php');
+                            ?>
                             <iframe
                                 id="pdf-iframe-day2"
                                 class="pdf-frame"
-                                src="<?php echo esc_url($day2_pdf); ?>"
+                                src="<?php echo esc_url($day2_proxy_url); ?>"
                                 title="<?php echo esc_attr($day2_title_ar); ?> - PDF"
                                 width="100%"
                                 height="600"
