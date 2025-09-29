@@ -94,8 +94,8 @@ if (!$qr_cards || !is_array($qr_cards)) {
     
     <!-- Language Toggle -->
     <div class="language-toggle">
-        <button id="lang-ar" class="lang-btn active" data-lang="ar">العربية</button>
-        <button id="lang-en" class="lang-btn" data-lang="en">English</button>
+        <button id="lang-ar" class="lang-btn active" onclick="switchLanguage('ar')">العربية</button>
+        <button id="lang-en" class="lang-btn" onclick="switchLanguage('en')">English</button>
     </div>
 
     <!-- Event Header -->
@@ -226,24 +226,15 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
+                            <button onclick="openPDF('<?php echo esc_url($day1_pdf); ?>', '<?php echo esc_js($day1_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
                             <a href="<?php echo esc_url($day1_pdf); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
                         </div>
 
                         <div class="pdf-container">
-                            <div class="pdf-loading" id="pdf-loading-day1">
-                                <div class="spinner"></div>
-                                <p>جاري تحميل الملف...</p>
-                            </div>
-                            <iframe
-                                id="pdf-iframe-day1"
-                                class="pdf-frame"
-                                title="<?php echo esc_attr($day1_title_ar); ?> - PDF"
-                                data-day="day1"
-                                data-pdf-src="<?php echo esc_url($day1_pdf_viewer ? $day1_pdf_viewer : $day1_pdf); ?>"
-                                data-pdf-original="<?php echo esc_url($day1_pdf); ?>"
-                                loading="lazy"
-                                allowfullscreen>
-                            </iframe>
+                            <p class="pdf-info">
+                                <span class="lang-ar">لفتح الملف، اضغط على زر "عرض" أعلاه</span>
+                                <span class="lang-en" style="display: none;">To open the file, click the "View" button above</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -331,24 +322,15 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
+                            <button onclick="openPDF('<?php echo esc_url($day2_pdf); ?>', '<?php echo esc_js($day2_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
                             <a href="<?php echo esc_url($day2_pdf); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
                         </div>
 
                         <div class="pdf-container">
-                            <div class="pdf-loading" id="pdf-loading-day2">
-                                <div class="spinner"></div>
-                                <p>جاري تحميل الملف...</p>
-                            </div>
-                            <iframe
-                                id="pdf-iframe-day2"
-                                class="pdf-frame"
-                                title="<?php echo esc_attr($day2_title_ar); ?> - PDF"
-                                data-day="day2"
-                                data-pdf-src="<?php echo esc_url($day2_pdf_viewer ? $day2_pdf_viewer : $day2_pdf); ?>"
-                                data-pdf-original="<?php echo esc_url($day2_pdf); ?>"
-                                loading="lazy"
-                                allowfullscreen>
-                            </iframe>
+                            <p class="pdf-info">
+                                <span class="lang-ar">لفتح الملف، اضغط على زر "عرض" أعلاه</span>
+                                <span class="lang-en" style="display: none;">To open the file, click the "View" button above</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -841,10 +823,27 @@ body {
     font-size: 0.9rem;
     transition: var(--transition);
     text-decoration: none;
+    margin: 0 5px;
 }
 
 .pdf-btn:hover {
     background: #b8934a;
+}
+
+.pdf-btn.view-btn {
+    background: #2196F3;
+}
+
+.pdf-btn.view-btn:hover {
+    background: #1976D2;
+}
+
+.pdf-info {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-style: italic;
+    font-size: 1.1rem;
 }
 
 .pdf-container {
@@ -1392,43 +1391,81 @@ body.ar-active .lang-en[style*="display: block"] {
 }
 </style>
 
-<!-- JavaScript -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Simple JavaScript -->
 <script>
-jQuery(function($) {
-    function setLanguage(lang) {
-        const isArabic = lang === 'ar';
-
-        try {
-            localStorage.setItem('arabBoard2025Lang', lang);
-        } catch (error) {
-            console.warn('Unable to persist language preference:', error);
-        }
-
-        $('.lang-btn').removeClass('active');
-        $('#lang-' + lang).addClass('active');
-
-        $('.lang-ar').toggle(isArabic);
-        $('.lang-en').toggle(!isArabic);
-
-        $('body')
-            .attr('dir', isArabic ? 'rtl' : 'ltr')
-            .toggleClass('rtl', isArabic)
-            .toggleClass('ltr', !isArabic)
-            .css('text-align', isArabic ? 'right' : 'left');
-
-        $('html')
-            .attr('dir', isArabic ? 'rtl' : 'ltr')
-            .attr('lang', isArabic ? 'ar' : 'en');
-    }
-
-    $('.lang-btn').on('click', function(e) {
-        e.preventDefault();
-        const lang = $(this).data('lang');
-        if (lang) {
-            setLanguage(lang);
-        }
+// تبديل اللغة - كود بسيط وفعال
+function switchLanguage(lang) {
+    console.log('🔄 تبديل اللغة إلى:', lang);
+    
+    // إزالة active من جميع الأزرار
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
+    
+    // إضافة active للزر المحدد
+    document.getElementById('lang-' + lang).classList.add('active');
+    
+    // إظهار/إخفاء المحتوى
+    if (lang === 'ar') {
+        // عرض العربية وإخفاء الإنجليزية
+        document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'block');
+        document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'none');
+        document.body.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('lang', 'ar');
+    } else {
+        // عرض الإنجليزية وإخفاء العربية
+        document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'block');
+        document.body.setAttribute('dir', 'ltr');
+        document.documentElement.setAttribute('dir', 'ltr');
+        document.documentElement.setAttribute('lang', 'en');
+    }
+    
+    // حفظ التفضيل
+    try {
+        localStorage.setItem('selectedLang', lang);
+    } catch(e) {
+        console.log('تعذر حفظ اللغة');
+    }
+}
+
+// إعداد اللغة عند التحميل
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ تم تحميل الصفحة - إعداد اللغة');
+    
+    // قراءة اللغة المحفوظة أو استخدام العربية كافتراضي
+    let savedLang = 'ar';
+    try {
+        savedLang = localStorage.getItem('selectedLang') || 'ar';
+    } catch(e) {
+        console.log('استخدام اللغة الافتراضية: العربية');
+    }
+    
+    switchLanguage(savedLang);
+});
+
+// عارض PDF بسيط
+function openPDF(pdfUrl, title) {
+    console.log('📄 فتح PDF:', title);
+    
+    if (!pdfUrl) {
+        alert('رابط PDF غير متوفر');
+        return;
+    }
+    
+    // فتح PDF في نافذة جديدة
+    const pdfWindow = window.open(
+        pdfUrl,
+        'pdfViewer',
+        'width=1000,height=700,scrollbars=yes,resizable=yes,menubar=no,toolbar=yes'
+    );
+    
+    if (!pdfWindow) {
+        // إذا تم حجب النافذة المنبثقة، استخدم رابط مباشر
+        window.location.href = pdfUrl;
+    }
+}
 
     let initialLang = 'ar';
 
