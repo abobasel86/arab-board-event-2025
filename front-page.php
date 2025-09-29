@@ -1236,44 +1236,24 @@ body.lang-en-active {
 }
 
 /* Language visibility control */
+.lang-ar,
 .lang-en {
+    display: none;
+}
+
+body.lang-ar-active .lang-ar {
+    display: revert !important;
+}
+
+body.lang-ar-active .lang-en {
     display: none !important;
 }
 
-.lang-ar {
-    display: block !important;
+body.lang-en-active .lang-en {
+    display: revert !important;
 }
 
-body.en-active .lang-en {
-    display: block !important;
-}
-
-body.en-active .lang-ar {
-    display: none !important;
-}
-
-body.ar-active .lang-ar {
-    display: block !important;
-}
-
-body.ar-active .lang-en {
-    display: none !important;
-}
-
-/* Override inline styles */
-body.en-active .lang-en[style*="display: none"] {
-    display: block !important;
-}
-
-body.ar-active .lang-ar[style*="display: none"] {
-    display: block !important;
-}
-
-body.en-active .lang-ar[style*="display: block"] {
-    display: none !important;
-}
-
-body.ar-active .lang-en[style*="display: block"] {
+body.lang-en-active .lang-ar {
     display: none !important;
 }
 
@@ -1422,8 +1402,6 @@ body.ar-active .lang-en[style*="display: block"] {
 document.addEventListener('DOMContentLoaded', function() {
     var body = document.body;
     var langButtons = document.querySelectorAll('.lang-btn');
-    var langArElements = document.querySelectorAll('.lang-ar');
-    var langEnElements = document.querySelectorAll('.lang-en');
 
     function activateLanguage(lang) {
         var isArabic = lang === 'ar';
@@ -1434,13 +1412,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.toggle('active', btn.id === 'lang-' + lang);
         });
 
-        langArElements.forEach(function(el) {
-            el.style.display = isArabic ? '' : 'none';
-        });
-
-        langEnElements.forEach(function(el) {
-            el.style.display = isArabic ? 'none' : '';
-        });
     }
 
     var langArBtn = document.getElementById('lang-ar');
