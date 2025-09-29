@@ -1,14 +1,11 @@
 <?php
 /**
- * PDF Proxy - مخفي عن IDM
- * يعمل كوسيط لعرض ملفات PDF دون كشفها لبرامج التحميل
+ * وسيط مبسط لعرض وتحميل ملفات PDF من خلال ووردبريس.
  */
 
-// منع الوصول المباشر
 if (!defined('ABSPATH')) {
-    // إذا لم يكن WordPress محملاً، حمله
     $wp_path = dirname(dirname(dirname(dirname(__FILE__))));
-    require_once($wp_path . '/wp-load.php');
+    require_once $wp_path . '/wp-load.php';
 }
 
 // التحقق من وجود معاملات
