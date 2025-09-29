@@ -235,7 +235,42 @@ if (!$qr_cards || !is_array($qr_cards)) {
         }
         
         switchLanguage(savedLang);
+        
+        // إعداد PDF viewers
+        setupPDFViewers();
     });
+    
+    // إعداد عارضات PDF
+    function setupPDFViewers() {
+        const pdfFrames = document.querySelectorAll('.pdf-frame');
+        
+        pdfFrames.forEach(function(iframe) {
+            const loadingEl = iframe.parentNode.querySelector('.pdf-loading');
+            
+            iframe.addEventListener('load', function() {
+                console.log('✅ تم تحميل PDF بنجاح');
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
+                }
+                iframe.style.display = 'block';
+            });
+            
+            iframe.addEventListener('error', function() {
+                console.error('❌ فشل في تحميل PDF');
+                if (loadingEl) {
+                    loadingEl.innerHTML = `
+                        <p style="color: #d32f2f; text-align: center;">
+                            <span class="lang-ar">تعذر عرض ملف PDF. <a href="${iframe.src}" target="_blank" style="color: #1976d2;">انقر هنا لفتح الملف</a></span>
+                            <span class="lang-en" style="display: none;">Failed to display PDF. <a href="${iframe.src}" target="_blank" style="color: #1976d2;">Click here to open file</a></span>
+                        </p>
+                    `;
+                }
+            });
+            
+            // إخفاء iframe حتى يكتمل التحميل
+            iframe.style.display = 'none';
+        });
+    }
     </script>
     
     <?php wp_head(); ?>
@@ -383,26 +418,40 @@ if (!$qr_cards || !is_array($qr_cards)) {
                             // Debug: طباعة معلومات PDF للتشخيص
                             echo "<!-- DEBUG PDF Day1: ";
                             echo "Page ID: $page_id, ";
-                            echo "Original PDF: $day1_pdf, ";
-                            
-                            // إنشاء روابط proxy صحيحة
-                            $day1_proxy_view = arab_board_2025_get_protected_pdf_url($day1_pdf, 'day1') . '&view=direct';
-                            $day1_proxy_download = arab_board_2025_get_protected_pdf_url($day1_pdf, 'day1') . '&download=1';
-                            
-                            echo "Proxy View: $day1_proxy_view, ";
-                            echo "Proxy Download: $day1_proxy_download";
+                            echo "Original PDF: $day1_pdf ";
                             echo " -->";
                             ?>
-                            <button onclick="openPDF('<?php echo esc_url($day1_proxy_view); ?>', '<?php echo esc_js($day1_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
-                            <a href="<?php echo esc_url($day1_proxy_download); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
+                            <a href="<?php echo esc_url($day1_pdf); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
                         </div>
 
+                        <?php if ($day1_pdf) : ?>
+                        <div class="pdf-container">
+                            <div class="pdf-loading" id="pdf-loading-day1">
+                                <div class="spinner"></div>
+                                <p class="lang-ar">جاري تحميل الملف...</p>
+                                <p class="lang-en" style="display: none;">Loading file...</p>
+                            </div>
+                            <iframe
+                                id="pdf-iframe-day1"
+                                class="pdf-frame"
+                                src="<?php echo esc_url($day1_pdf); ?>"
+                                title="<?php echo esc_attr($day1_title_ar); ?> - PDF"
+                                width="100%"
+                                height="600"
+                                frameborder="0"
+                                loading="lazy">
+                                <p class="lang-ar">متصفحك لا يدعم عرض PDF. <a href="<?php echo esc_url($day1_pdf); ?>" target="_blank">اضغط هنا لفتح الملف</a></p>
+                                <p class="lang-en" style="display: none;">Your browser doesn't support PDF viewing. <a href="<?php echo esc_url($day1_pdf); ?>" target="_blank">Click here to open the file</a></p>
+                            </iframe>
+                        </div>
+                        <?php else : ?>
                         <div class="pdf-container">
                             <p class="pdf-info">
-                                <span class="lang-ar">لفتح الملف، اضغط على زر "عرض" أعلاه</span>
-                                <span class="lang-en" style="display: none;">To open the file, click the "View" button above</span>
+                                <span class="lang-ar">لم يتم رفع ملف PDF بعد. يرجى المحاولة لاحقاً.</span>
+                                <span class="lang-en" style="display: none;">PDF file not uploaded yet. Please try again later.</span>
                             </p>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -489,21 +538,37 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
-                            <?php 
-                            // إنشاء روابط proxy صحيحة
-                            $day2_proxy_view = arab_board_2025_get_protected_pdf_url($day2_pdf, 'day2') . '&view=direct';
-                            $day2_proxy_download = arab_board_2025_get_protected_pdf_url($day2_pdf, 'day2') . '&download=1';
-                            ?>
-                            <button onclick="openPDF('<?php echo esc_url($day2_proxy_view); ?>', '<?php echo esc_js($day2_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
-                            <a href="<?php echo esc_url($day2_proxy_download); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
+                            <a href="<?php echo esc_url($day2_pdf); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
                         </div>
 
+                        <?php if ($day2_pdf) : ?>
+                        <div class="pdf-container">
+                            <div class="pdf-loading" id="pdf-loading-day2">
+                                <div class="spinner"></div>
+                                <p class="lang-ar">جاري تحميل الملف...</p>
+                                <p class="lang-en" style="display: none;">Loading file...</p>
+                            </div>
+                            <iframe
+                                id="pdf-iframe-day2"
+                                class="pdf-frame"
+                                src="<?php echo esc_url($day2_pdf); ?>"
+                                title="<?php echo esc_attr($day2_title_ar); ?> - PDF"
+                                width="100%"
+                                height="600"
+                                frameborder="0"
+                                loading="lazy">
+                                <p class="lang-ar">متصفحك لا يدعم عرض PDF. <a href="<?php echo esc_url($day2_pdf); ?>" target="_blank">اضغط هنا لفتح الملف</a></p>
+                                <p class="lang-en" style="display: none;">Your browser doesn't support PDF viewing. <a href="<?php echo esc_url($day2_pdf); ?>" target="_blank">Click here to open the file</a></p>
+                            </iframe>
+                        </div>
+                        <?php else : ?>
                         <div class="pdf-container">
                             <p class="pdf-info">
-                                <span class="lang-ar">لفتح الملف، اضغط على زر "عرض" أعلاه</span>
-                                <span class="lang-en" style="display: none;">To open the file, click the "View" button above</span>
+                                <span class="lang-ar">لم يتم رفع ملف PDF بعد. يرجى المحاولة لاحقاً.</span>
+                                <span class="lang-en" style="display: none;">PDF file not uploaded yet. Please try again later.</span>
                             </p>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -1016,6 +1081,45 @@ body {
     color: #6c757d;
     font-style: italic;
     font-size: 1.1rem;
+}
+
+.pdf-frame {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: #f9f9f9;
+}
+
+.pdf-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pdf-frame.loaded + .pdf-loading {
+    display: none;
 }
 
 .pdf-container {
