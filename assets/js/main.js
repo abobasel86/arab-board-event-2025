@@ -18,19 +18,23 @@
      * Language Toggle Functionality
      */
     function initLanguageToggle() {
-        const languageButtons = $('.language-toggle button');
-        
+        const languageButtons = $('.language-toggle .lang-btn');
+
         languageButtons.on('click', function() {
             const selectedLang = $(this).data('lang');
-            const currentLang = $('body').hasClass('rtl') ? 'ar' : 'en';
-            
+
+            if (!selectedLang) {
+                return;
+            }
+
+            const currentLang = ($('html').attr('dir') === 'rtl' || $('body').hasClass('rtl')) ? 'ar' : 'en';
+
             if (selectedLang !== currentLang) {
                 switchLanguage(selectedLang);
-                
-                // Update active button
-                languageButtons.removeClass('active');
-                $(this).addClass('active');
             }
+
+            languageButtons.removeClass('active');
+            $(this).addClass('active');
         });
     }
     
@@ -39,20 +43,24 @@
      */
     function switchLanguage(lang) {
         if (lang === 'ar') {
-            $('body').removeClass('ltr').addClass('rtl');
+            $('body').removeClass('ltr').addClass('rtl').attr('dir', 'rtl');
             $('html').attr('lang', 'ar').attr('dir', 'rtl');
         } else {
-            $('body').removeClass('rtl').addClass('ltr');
+            $('body').removeClass('rtl').addClass('ltr').attr('dir', 'ltr');
             $('html').attr('lang', 'en').attr('dir', 'ltr');
         }
-        
+
         // Toggle content visibility based on language
         $('.lang-ar').toggle(lang === 'ar');
         $('.lang-en').toggle(lang === 'en');
-        
+
         // Save language preference
-        localStorage.setItem('arabBoard2025Lang', lang);
-        
+        try {
+            localStorage.setItem('arabBoard2025Lang', lang);
+        } catch (error) {
+            console.warn('Unable to persist language preference:', error);
+        }
+
         // Update text content dynamically
         updateTextContent(lang);
     }
@@ -290,13 +298,20 @@
      * Load saved language preference
      */
     function loadLanguagePreference() {
-        const savedLang = localStorage.getItem('arabBoard2025Lang');
-        
-        if (savedLang) {
-            $(`.language-toggle button[data-lang="${savedLang}"]`).click();
+        let savedLang = null;
+
+        try {
+            savedLang = localStorage.getItem('arabBoard2025Lang');
+        } catch (error) {
+            console.warn('Unable to read stored language preference:', error);
+        }
+
+        if (savedLang === 'ar' || savedLang === 'en') {
+            $(`.language-toggle .lang-btn[data-lang="${savedLang}"]`).trigger('click');
         } else {
             // Default to Arabic if no preference is saved
-            $('.language-toggle button[data-lang="ar"]').addClass('active');
+            switchLanguage('ar');
+            $('.language-toggle .lang-btn[data-lang="ar"]').addClass('active');
         }
     }
     

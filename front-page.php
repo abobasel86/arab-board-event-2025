@@ -52,6 +52,7 @@ $event_description_en = get_post_meta($page_id, '_event_subtitle_en', true) ?: '
 $day1_title_ar = 'اليوم الأول';
 $day1_title_en = 'Day 1';
 $day1_pdf = get_post_meta($page_id, '_day1_pdf', true);
+$day1_pdf_viewer = $day1_pdf ? arab_board_2025_get_protected_pdf_url($day1_pdf, 'day1') : '';
 $day1_schedule = get_post_meta($page_id, '_day1_schedule', true);
 $day1_images = get_post_meta($page_id, '_day1_images', true);
 
@@ -59,6 +60,7 @@ $day1_images = get_post_meta($page_id, '_day1_images', true);
 $day2_title_ar = 'اليوم الثاني';
 $day2_title_en = 'Day 2';
 $day2_pdf = get_post_meta($page_id, '_day2_pdf', true);
+$day2_pdf_viewer = $day2_pdf ? arab_board_2025_get_protected_pdf_url($day2_pdf, 'day2') : '';
 $day2_schedule = get_post_meta($page_id, '_day2_schedule', true);
 $day2_images = get_post_meta($page_id, '_day2_images', true);
 
@@ -92,8 +94,8 @@ if (!$qr_cards || !is_array($qr_cards)) {
     
     <!-- Language Toggle -->
     <div class="language-toggle">
-        <button id="lang-ar" class="lang-btn active">العربية</button>
-        <button id="lang-en" class="lang-btn">English</button>
+        <button id="lang-ar" class="lang-btn active" data-lang="ar">العربية</button>
+        <button id="lang-en" class="lang-btn" data-lang="en">English</button>
     </div>
 
     <!-- Event Header -->
@@ -236,7 +238,9 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 id="pdf-iframe-day1"
                                 class="pdf-frame"
                                 title="<?php echo esc_attr($day1_title_ar); ?> - PDF"
-                                data-pdf-src="<?php echo esc_url($day1_pdf); ?>"
+                                data-day="day1"
+                                data-pdf-src="<?php echo esc_url($day1_pdf_viewer ? $day1_pdf_viewer : $day1_pdf); ?>"
+                                data-pdf-original="<?php echo esc_url($day1_pdf); ?>"
                                 loading="lazy"
                                 allowfullscreen>
                             </iframe>
@@ -339,7 +343,9 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 id="pdf-iframe-day2"
                                 class="pdf-frame"
                                 title="<?php echo esc_attr($day2_title_ar); ?> - PDF"
-                                data-pdf-src="<?php echo esc_url($day2_pdf); ?>"
+                                data-day="day2"
+                                data-pdf-src="<?php echo esc_url($day2_pdf_viewer ? $day2_pdf_viewer : $day2_pdf); ?>"
+                                data-pdf-original="<?php echo esc_url($day2_pdf); ?>"
                                 loading="lazy"
                                 allowfullscreen>
                             </iframe>
@@ -1393,27 +1399,49 @@ jQuery(function($) {
     function setLanguage(lang) {
         const isArabic = lang === 'ar';
 
+        try {
+            localStorage.setItem('arabBoard2025Lang', lang);
+        } catch (error) {
+            console.warn('Unable to persist language preference:', error);
+        }
+
         $('.lang-btn').removeClass('active');
         $('#lang-' + lang).addClass('active');
 
         $('.lang-ar').toggle(isArabic);
         $('.lang-en').toggle(!isArabic);
 
-        $('body').attr('dir', isArabic ? 'rtl' : 'ltr')
-                 .css('text-align', isArabic ? 'right' : 'left');
+        $('body')
+            .attr('dir', isArabic ? 'rtl' : 'ltr')
+            .toggleClass('rtl', isArabic)
+            .toggleClass('ltr', !isArabic)
+            .css('text-align', isArabic ? 'right' : 'left');
+
+        $('html')
+            .attr('dir', isArabic ? 'rtl' : 'ltr')
+            .attr('lang', isArabic ? 'ar' : 'en');
     }
 
-    $('#lang-ar').on('click', function(e) {
+    $('.lang-btn').on('click', function(e) {
         e.preventDefault();
-        setLanguage('ar');
+        const lang = $(this).data('lang');
+        if (lang) {
+            setLanguage(lang);
+        }
     });
 
-    $('#lang-en').on('click', function(e) {
-        e.preventDefault();
-        setLanguage('en');
-    });
+    let initialLang = 'ar';
 
-    setLanguage('ar');
+    try {
+        const storedLang = localStorage.getItem('arabBoard2025Lang');
+        if (storedLang === 'en' || storedLang === 'ar') {
+            initialLang = storedLang;
+        }
+    } catch (error) {
+        console.warn('Unable to read stored language preference:', error);
+    }
+
+    setLanguage(initialLang);
 
     $('.nav-tab').on('click', function(e) {
         e.preventDefault();
@@ -1478,11 +1506,10 @@ jQuery(function($) {
         }
     });
 
-    const viewerBaseUrl = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=';
-
     $('.pdf-frame').each(function() {
         const iframe = $(this);
         const pdfUrl = iframe.data('pdf-src');
+        const originalUrl = iframe.data('pdf-original') || pdfUrl;
         const container = iframe.closest('.pdf-container');
         const loading = container.find('.pdf-loading');
 
@@ -1491,8 +1518,7 @@ jQuery(function($) {
             return;
         }
 
-        const viewerUrl = viewerBaseUrl + encodeURIComponent(pdfUrl);
-        iframe.attr('src', viewerUrl);
+        iframe.attr('src', pdfUrl);
 
         iframe.on('load', function() {
             loading.fadeOut(200);
@@ -1503,7 +1529,7 @@ jQuery(function($) {
             loading.addClass('error').html(
                 '<div style="text-align:center; padding:1.5rem;">' +
                 '<p style="color:#d32f2f; margin-bottom:0.75rem;">تعذر عرض ملف PDF.</p>' +
-                '<a href="' + pdfUrl + '" target="_blank" rel="noopener" ' +
+                '<a href="' + originalUrl + '" target="_blank" rel="noopener" ' +
                 'style="background:#156b68; color:#fff; padding:0.5rem 1rem; border-radius:4px; display:inline-block;">فتح الملف في نافذة جديدة</a>' +
                 '</div>'
             );

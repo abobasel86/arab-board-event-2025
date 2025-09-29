@@ -114,6 +114,33 @@ function arab_board_2025_scripts() {
 }
 add_action('wp_enqueue_scripts', 'arab_board_2025_scripts');
 
+/**
+ * Build a proxied viewer URL for PDF files so they can be displayed safely in iframes.
+ *
+ * @param string $pdf_url Original PDF URL.
+ * @param string $day     Identifier for the day/section using the PDF.
+ *
+ * @return string Proxied viewer URL or the original URL if encoding fails.
+ */
+function arab_board_2025_get_protected_pdf_url($pdf_url, $day = '') {
+    if (empty($pdf_url)) {
+        return '';
+    }
+
+    $data = array(
+        'url' => esc_url_raw($pdf_url),
+        'day' => sanitize_key($day),
+    );
+
+    $encoded = base64_encode(wp_json_encode($data));
+
+    if (empty($encoded)) {
+        return esc_url_raw($pdf_url);
+    }
+
+    return trailingslashit(get_template_directory_uri()) . 'pdf-proxy.php?file=' . rawurlencode($encoded);
+}
+
 // Add admin styles and scripts
 function arab_board_2025_admin_scripts() {
     wp_enqueue_media();
