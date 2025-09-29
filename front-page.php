@@ -4,8 +4,17 @@
  * Template for Arab Board Event 2025
  */
 
-// Get the current page ID
+// Get the current page ID - with fallback for front-page
 $page_id = get_the_ID();
+if (!$page_id) {
+    $page_id = get_option('page_on_front'); // الصفحة الرئيسية
+}
+if (!$page_id) {
+    $page_id = get_option('page_for_posts'); // صفحة المقالات
+}
+
+// Debug: طباعة page_id للتأكد
+// echo "<!-- DEBUG: Page ID = $page_id -->";
 
 // Extract event details from meta fields
 $event_title_ar = get_post_meta($page_id, '_event_title_ar', true) ?: 'ملتقى المجلس العربي للاختصاصات الصحية 2025';
@@ -85,9 +94,35 @@ if (!$qr_cards || !is_array($qr_cards)) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;600;700;800;900&family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- CSS قوي لإخفاء اللغة -->
+    <style>
+    /* إخفاء الإنجليزية افتراضياً */
+    .lang-en {
+        display: none !important;
+    }
+    /* إظهار العربية افتراضياً */
+    .lang-ar {
+        display: block !important;
+    }
+    /* عند اختيار الإنجليزية */
+    body.lang-english .lang-ar {
+        display: none !important;
+    }
+    body.lang-english .lang-en {
+        display: block !important;
+    }
+    /* عند اختيار العربية */
+    body.lang-arabic .lang-ar {
+        display: block !important;
+    }
+    body.lang-arabic .lang-en {
+        display: none !important;
+    }
+    </style>
+    
     <!-- JavaScript Functions - تحميل مبكر لضمان العمل -->
     <script>
-    // تبديل اللغة - كود بسيط وفعال  
+    // تبديل اللغة - محسن وقوي
     function switchLanguage(lang) {
         console.log('🔄 تبديل اللغة إلى:', lang);
         
@@ -97,20 +132,23 @@ if (!$qr_cards || !is_array($qr_cards)) {
         });
         
         // إضافة active للزر المحدد
-        document.getElementById('lang-' + lang).classList.add('active');
+        const activeBtn = document.getElementById('lang-' + lang);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
         
-        // إظهار/إخفاء المحتوى
+        // تبديل class على body للتحكم في CSS
+        document.body.classList.remove('lang-arabic', 'lang-english');
+        document.body.classList.add(lang === 'ar' ? 'lang-arabic' : 'lang-english');
+        
+        console.log('✅ تم تطبيق class:', lang === 'ar' ? 'lang-arabic' : 'lang-english');
+        
+        // تغيير اتجاه النص
         if (lang === 'ar') {
-            // عرض العربية وإخفاء الإنجليزية
-            document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'block');
-            document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'none');
             document.body.setAttribute('dir', 'rtl');
             document.documentElement.setAttribute('dir', 'rtl');
             document.documentElement.setAttribute('lang', 'ar');
         } else {
-            // عرض الإنجليزية وإخفاء العربية
-            document.querySelectorAll('.lang-ar').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.lang-en').forEach(el => el.style.display = 'block');
             document.body.setAttribute('dir', 'ltr');
             document.documentElement.setAttribute('dir', 'ltr');
             document.documentElement.setAttribute('lang', 'en');
@@ -119,18 +157,27 @@ if (!$qr_cards || !is_array($qr_cards)) {
         // حفظ التفضيل
         try {
             localStorage.setItem('selectedLang', lang);
+            console.log('✅ تم حفظ اللغة:', lang);
         } catch(e) {
-            console.log('تعذر حفظ اللغة');
+            console.warn('تعذر حفظ اللغة:', e);
         }
     }
 
-    // عارض PDF محسن يعمل مع نظام proxy
+    // عارض PDF محسن مع debug متقدم
     function openPDF(pdfUrl, title) {
         console.log('📄 فتح PDF:', title);
-        console.log('🔗 الرابط:', pdfUrl);
+        console.log('🔗 الرابط المستلم:', pdfUrl);
         
-        if (!pdfUrl) {
-            alert('رابط PDF غير متوفر');
+        if (!pdfUrl || pdfUrl.trim() === '') {
+            console.error('❌ رابط PDF فارغ أو غير متوفر');
+            alert('رابط PDF غير متوفر. يرجى التأكد من رفع الملف في لوحة التحكم.');
+            return;
+        }
+        
+        // فحص صحة الرابط
+        if (!pdfUrl.startsWith('http') && !pdfUrl.startsWith('/')) {
+            console.error('❌ رابط PDF غير صحيح:', pdfUrl);
+            alert('رابط PDF غير صحيح. يرجى مراجعة إعدادات لوحة التحكم.');
             return;
         }
         
@@ -333,9 +380,18 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
                             <?php 
+                            // Debug: طباعة معلومات PDF للتشخيص
+                            echo "<!-- DEBUG PDF Day1: ";
+                            echo "Page ID: $page_id, ";
+                            echo "Original PDF: $day1_pdf, ";
+                            
                             // إنشاء روابط proxy صحيحة
                             $day1_proxy_view = arab_board_2025_get_protected_pdf_url($day1_pdf, 'day1') . '&view=direct';
                             $day1_proxy_download = arab_board_2025_get_protected_pdf_url($day1_pdf, 'day1') . '&download=1';
+                            
+                            echo "Proxy View: $day1_proxy_view, ";
+                            echo "Proxy Download: $day1_proxy_download";
+                            echo " -->";
                             ?>
                             <button onclick="openPDF('<?php echo esc_url($day1_proxy_view); ?>', '<?php echo esc_js($day1_title_ar); ?>')" class="pdf-btn view-btn">عرض</button>
                             <a href="<?php echo esc_url($day1_proxy_download); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener">تحميل</a>
