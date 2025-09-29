@@ -1,303 +1,278 @@
 <?php
 /**
- * PDF Proxy - مخفي عن IDM
- * يعمل كوسيط لعرض ملفات PDF دون كشفها لبرامج التحميل
+ * PDF Proxy - واجهة وسيطة لعرض ملفات PDF دون أن تعترضها برامج التحميل.
  */
 
-// منع الوصول المباشر
+// تأكد من تحميل ووردبريس عند الوصول المباشر للملف.
 if (!defined('ABSPATH')) {
-    // إذا لم يكن WordPress محملاً، حمله
     $wp_path = dirname(dirname(dirname(dirname(__FILE__))));
-    require_once($wp_path . '/wp-load.php');
+    require_once $wp_path . '/wp-load.php';
 }
 
-// التحقق من وجود معاملات
+// التحقق من وجود البيانات المطلوبة.
 if (!isset($_GET['file']) || empty($_GET['file'])) {
-    http_response_code(404);
-    die('ملف غير موجود');
+    wp_die('ملف غير موجود', 'PDF Proxy', array('response' => 404));
 }
 
-// فك تشفير الملف
-$file_data = base64_decode($_GET['file']);
+$file_data = base64_decode(wp_unslash($_GET['file']));
 if (!$file_data) {
-    http_response_code(400);
-    die('بيانات غير صحيحة');
+    wp_die('بيانات غير صحيحة', 'PDF Proxy', array('response' => 400));
 }
 
-// استخراج المعلومات
 $file_info = json_decode($file_data, true);
-if (!$file_info || !isset($file_info['url'])) {
-    http_response_code(400);
-    die('بيانات الملف غير صحيحة');
+if (!is_array($file_info) || empty($file_info['url'])) {
+    wp_die('بيانات الملف غير صحيحة', 'PDF Proxy', array('response' => 400));
 }
 
 $pdf_url = $file_info['url'];
-$day = isset($file_info['day']) ? $file_info['day'] : 'unknown';
+$day = isset($file_info['day']) ? sanitize_title($file_info['day']) : 'document';
 
-// التحقق من صحة الرابط
 if (!filter_var($pdf_url, FILTER_VALIDATE_URL)) {
-    http_response_code(400);
-    die('رابط غير صحيح');
+    wp_die('رابط غير صالح', 'PDF Proxy', array('response' => 400));
 }
 
-// Headers مضادة لـ IDM
-header('X-Robots-Tag: noindex, nofollow, nosnippet, noarchive');
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('Referrer-Policy: no-referrer');
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
-
-// معرف فريد لمنع الكشف
-$unique_id = uniqid('pdf_', true);
-header('X-Request-ID: ' . $unique_id);
-header('X-Content-Source: embedded');
-
-// إذا كان الطلب لعرض مباشر
-if (isset($_GET['view']) && $_GET['view'] === 'direct') {
-    // تحديد نوع المحتوى
-    header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="document_' . $day . '.pdf"');
-    
-    // إنشاء context للطلب مع Headers مخفية
-    $context = stream_context_create([
-        'http' => [
-            'method' => 'GET',
-            'header' => [
-                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language: ar,en-US;q=0.7,en;q=0.3',
-                'Accept-Encoding: identity',
-                'DNT: 1',
-                'Connection: keep-alive',
-                'Upgrade-Insecure-Requests: 1',
-                'Sec-Fetch-Dest: document',
-                'Sec-Fetch-Mode: navigate',
-                'Sec-Fetch-Site: cross-site'
-            ],
-            'timeout' => 30,
-            'ignore_errors' => true
-        ]
-    ]);
-    
-    // جلب الملف وإرساله
-    $file_content = file_get_contents($pdf_url, false, $context);
-    
-    if ($file_content === false) {
-        http_response_code(404);
-        die('لا يمكن الوصول للملف');
+$view = 'embed';
+if (isset($_GET['view'])) {
+    $candidate = sanitize_key(wp_unslash($_GET['view']));
+    if (in_array($candidate, array('direct', 'embed'), true)) {
+        $view = $candidate;
     }
-    
-    // إرسال المحتوى
-    echo $file_content;
+}
+
+$headers = array(
+    'X-Robots-Tag: noindex, nofollow, nosnippet, noarchive',
+    'X-Content-Type-Options: nosniff',
+    'Referrer-Policy: no-referrer',
+    'Cache-Control: no-store, no-cache, must-revalidate, max-age=0',
+    'Pragma: no-cache',
+    'Expires: Thu, 01 Jan 1970 00:00:00 GMT',
+);
+
+foreach ($headers as $header) {
+    header($header);
+}
+
+if ($view === 'direct') {
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="' . sanitize_file_name('document-' . $day . '.pdf') . '"');
+
+    $context = stream_context_create(
+        array(
+            'http' => array(
+                'method'  => 'GET',
+                'header'  => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36\r\n" .
+                             "Accept: application/pdf,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n" .
+                             "Accept-Language: ar,en-US;q=0.8,en;q=0.6\r\n" .
+                             "Cache-Control: no-store\r\n",
+                'timeout' => 30,
+            ),
+        )
+    );
+
+    $file_stream = @fopen($pdf_url, 'rb', false, $context);
+    if (!$file_stream) {
+        wp_die('تعذر الوصول إلى الملف', 'PDF Proxy', array('response' => 404));
+    }
+
+    while (!feof($file_stream)) {
+        echo fread($file_stream, 8192);
+        flush();
+    }
+
+    fclose($file_stream);
     exit;
 }
 
-// عرض الصفحة المدمجة
-?>
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
+$scheme = is_ssl() ? 'https://' : 'http://';
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+$request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '';
+$current_url = $scheme . $host . $request_uri;
+$base_url = remove_query_arg(array('view', 't'), $current_url);
+$direct_url = add_query_arg('view', 'direct', $base_url);
+
+?><!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>عارض PDF - <?php echo htmlspecialchars($day, ENT_QUOTES, 'UTF-8'); ?></title>
+    <title><?php echo esc_html(sprintf(__('عارض PDF - %s', 'arab-board-event'), ucwords(str_replace('-', ' ', $day)))); ?></title>
     <style>
+        :root {
+            color-scheme: light;
+            font-family: 'Almarai', 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Arial', sans-serif;
-            background: #f5f5f5;
-            height: 100vh;
-            overflow: hidden;
-            /* حماية من IDM */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            background: #f5f7f8;
+            color: #134a47;
+            min-height: 100vh;
         }
-        
-        .viewer-container {
-            width: 100%;
-            height: 100vh;
+
+        .viewer-shell {
             position: relative;
-            background: white;
-            /* إخفاء من IDM */
-            opacity: 0.999;
-            transform: translateZ(0);
-            will-change: transform;
-        }
-        
-        .pdf-frame {
             width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-            /* حماية متقدمة من IDM */
-            pointer-events: auto;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-            /* فلاتر دقيقة لتضليل IDM */
-            filter: brightness(1.001) contrast(1.001);
-            transform: scale(1.0001);
+            height: 100vh;
+            max-height: 100vh;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
         }
-        
-        .loading {
+
+        .pdf-frame {
+            flex: 1 1 auto;
+            width: 100%;
+            border: none;
+            background: #ffffff;
+            display: block;
+        }
+
+        .loading-state,
+        .error-state {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            font-size: 18px;
-            color: #156b68;
-            z-index: 10;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 1.5rem 2rem;
+            border-radius: 14px;
+            box-shadow: 0 18px 48px rgba(15, 84, 81, 0.14);
+            min-width: 260px;
         }
-        
+
+        .loading-state[hidden],
+        .error-state[hidden] {
+            display: none;
+        }
+
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #156b68;
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(21, 107, 104, 0.16);
+            border-top-color: #156b68;
             border-radius: 50%;
+            margin: 0 auto 1rem;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        /* حماية من overlays IDM */
-        body::before,
-        body::after,
-        .viewer-container::before,
-        .viewer-container::after {
-            content: none !important;
-            display: none !important;
+
+        .fallback-link {
+            display: inline-block;
+            margin-top: 1rem;
+            background: #156b68;
+            color: #ffffff;
+            padding: 0.55rem 1.4rem;
+            border-radius: 999px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.25s ease;
         }
-        
-        /* منع IDM من إدراج عناصر */
-        [class*="idm"], [id*="idm"], [class*="download"], [id*="download"] {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            position: absolute !important;
-            left: -9999px !important;
+
+        .fallback-link:hover,
+        .fallback-link:focus {
+            background: #0f5451;
+        }
+
+        p {
+            margin: 0;
+            line-height: 1.6;
+            font-size: 1rem;
         }
     </style>
 </head>
 <body>
-    <div class="viewer-container">
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>جاري تحميل المستند...</p>
+    <div class="viewer-shell">
+        <div class="loading-state" id="loading-state">
+            <div class="spinner" aria-hidden="true"></div>
+            <p>جاري تحميل ملف PDF...</p>
         </div>
-        
-        <iframe 
-            id="pdfFrame" 
-            class="pdf-frame"
-            style="display: none;"
-            data-no-idm="true"
-            data-anti-download="true"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-            loading="lazy">
-        </iframe>
+
+        <iframe id="pdf-viewer" class="pdf-frame" title="عارض PDF" hidden loading="lazy"></iframe>
+
+        <div class="error-state" id="error-state" hidden>
+            <p id="error-message">تعذر تحميل ملف PDF. يمكنك تحميله مباشرة.</p>
+            <a href="<?php echo esc_url($direct_url); ?>" class="fallback-link" target="_blank" rel="noopener noreferrer">فتح الملف مباشرة</a>
+        </div>
     </div>
 
     <script>
-        // منع IDM من العمل
-        (function() {
-            'use strict';
-            
-            // حماية النافذة من IDM
-            Object.defineProperty(window, 'external', {
-                value: null,
-                writable: false,
-                configurable: false
-            });
-            
-            // منع اختصارات IDM
-            document.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey && (e.key === 's' || e.key === 'd')) || 
-                    (e.altKey && e.type === 'click')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
+    (function() {
+        var directUrl = <?php echo wp_json_encode($direct_url); ?>;
+        var frame = document.getElementById('pdf-viewer');
+        var loadingState = document.getElementById('loading-state');
+        var errorState = document.getElementById('error-state');
+        var errorMessage = document.getElementById('error-message');
+        var objectUrl = null;
+
+        function revokeObjectUrl() {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+                objectUrl = null;
+            }
+        }
+
+        function showError(message) {
+            if (loadingState) {
+                loadingState.hidden = true;
+            }
+            if (frame) {
+                frame.hidden = true;
+                frame.removeAttribute('src');
+            }
+            if (errorState) {
+                errorState.hidden = false;
+            }
+            if (errorMessage && message) {
+                errorMessage.textContent = message;
+            }
+        }
+
+        if (!window.fetch || !window.URL || !window.URL.createObjectURL) {
+            showError('المتصفح لا يدعم عرض ملف PDF هنا. استخدم رابط التحميل المباشر.');
+            return;
+        }
+
+        window.addEventListener('beforeunload', revokeObjectUrl);
+        window.addEventListener('pagehide', revokeObjectUrl);
+
+        var fetchUrl = directUrl + (directUrl.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now();
+
+        fetch(fetchUrl, {
+            method: 'GET',
+            cache: 'no-store',
+            credentials: 'include'
+        }).then(function(response) {
+            if (!response.ok) {
+                throw new Error('response-' + response.status);
+            }
+            return response.blob();
+        }).then(function(blob) {
+            if (!blob || !blob.size) {
+                throw new Error('empty-blob');
+            }
+
+            objectUrl = URL.createObjectURL(blob);
+            frame.src = objectUrl + '#toolbar=0&navpanes=0&scrollbar=1&view=FitH';
+            frame.hidden = false;
+            frame.addEventListener('load', function() {
+                if (loadingState) {
+                    loadingState.hidden = true;
                 }
-            }, true);
-            
-            // منع النقر الأيمن
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                return false;
-            }, true);
-            
-            // منع السحب والإفلات
-            document.addEventListener('dragstart', function(e) {
-                e.preventDefault();
-                return false;
-            }, true);
-            
-            // مراقب IDM
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === 1) {
-                            // حذف عناصر IDM
-                            if (node.className && typeof node.className === 'string') {
-                                if (node.className.toLowerCase().includes('idm') || 
-                                    node.className.toLowerCase().includes('download')) {
-                                    node.remove();
-                                }
-                            }
-                        }
-                    });
-                });
-            });
-            
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true
-            });
-            
-            // تحميل PDF المحمي
-            window.addEventListener('load', function() {
-                const frame = document.getElementById('pdfFrame');
-                const loading = document.getElementById('loading');
-                
-                // إنشاء رابط محمي
-                const protectedUrl = window.location.href + '&view=direct&t=' + Date.now();
-                
-                // تحميل في iframe
-                frame.src = protectedUrl + '#toolbar=0&navpanes=0&scrollbar=1&view=FitH&embedded=true';
-                
-                // إخفاء loading بعد تحميل
-                setTimeout(function() {
-                    loading.style.display = 'none';
-                    frame.style.display = 'block';
-                }, 2000);
-                
-                // معالج تحميل iframe
-                frame.onload = function() {
-                    loading.style.display = 'none';
-                    frame.style.display = 'block';
-                };
-                
-                frame.onerror = function() {
-                    loading.innerHTML = '<p style="color: red;">خطأ في تحميل المستند</p>';
-                };
-            });
-        })();
+            }, { once: true });
+        }).catch(function() {
+            showError('تعذر تحميل ملف PDF. يمكنك تحميله مباشرة من الرابط أدناه.');
+        });
+    })();
     </script>
 </body>
 </html>

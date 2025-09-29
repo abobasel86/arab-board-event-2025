@@ -70,6 +70,8 @@ $day1_title_ar = 'اليوم الأول';
 $day1_title_en = 'Day 1';
 $day1_pdf = get_post_meta($page_id, '_day1_pdf', true);
 $day1_pdf_proxy = arab_board_get_pdf_proxy_url($day1_pdf, 'day-1');
+$day1_pdf_viewer = $day1_pdf_proxy ? add_query_arg('view', 'embed', $day1_pdf_proxy) : '';
+$day1_pdf_download = $day1_pdf_proxy ? add_query_arg('view', 'direct', $day1_pdf_proxy) : '';
 $day1_schedule = get_post_meta($page_id, '_day1_schedule', true);
 $day1_images = get_post_meta($page_id, '_day1_images', true);
 
@@ -78,6 +80,8 @@ $day2_title_ar = 'اليوم الثاني';
 $day2_title_en = 'Day 2';
 $day2_pdf = get_post_meta($page_id, '_day2_pdf', true);
 $day2_pdf_proxy = arab_board_get_pdf_proxy_url($day2_pdf, 'day-2');
+$day2_pdf_viewer = $day2_pdf_proxy ? add_query_arg('view', 'embed', $day2_pdf_proxy) : '';
+$day2_pdf_download = $day2_pdf_proxy ? add_query_arg('view', 'direct', $day2_pdf_proxy) : '';
 $day2_schedule = get_post_meta($page_id, '_day2_schedule', true);
 $day2_images = get_post_meta($page_id, '_day2_images', true);
 
@@ -136,27 +140,27 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <div class="title-section">
                     <h1 class="event-title">
                         <span class="lang-ar"><?php echo esc_html($event_title_ar); ?></span>
-                        <span class="lang-en" style="display: none;"><?php echo esc_html($event_title_en); ?></span>
+                        <span class="lang-en"><?php echo esc_html($event_title_en); ?></span>
                     </h1>
                 </div>
                 
                 <?php if ($event_description_ar || $event_description_en) : ?>
                 <div class="event-description">
                     <div class="lang-ar"><?php echo wp_kses_post($event_description_ar); ?></div>
-                    <div class="lang-en" style="display: none;"><?php echo wp_kses_post($event_description_en); ?></div>
+                    <div class="lang-en"><?php echo wp_kses_post($event_description_en); ?></div>
                 </div>
                 <?php endif; ?>
                 
                 <div class="event-dates">
                     <i class="icon-calendar"></i>
                     <span class="lang-ar"><?php echo esc_html($event_date_ar); ?></span>
-                    <span class="lang-en" style="display: none;"><?php echo esc_html($event_date_en); ?></span>
+                    <span class="lang-en"><?php echo esc_html($event_date_en); ?></span>
                 </div>
                 
                 <div class="event-location">
                     <i class="icon-location"></i>
                     <span class="lang-ar"><?php echo esc_html($event_location_ar); ?></span>
-                    <span class="lang-en" style="display: none;"><?php echo esc_html($event_location_en); ?></span>
+                    <span class="lang-en"><?php echo esc_html($event_location_en); ?></span>
                 </div>
             </div>
         </div>
@@ -168,16 +172,16 @@ if (!$qr_cards || !is_array($qr_cards)) {
             <ul class="nav-tabs">
                 <li><a href="#day1" class="nav-tab active">
                     <span class="lang-ar">اليوم الأول</span>
-                    <span class="lang-en" style="display: none;">Day 1</span>
+                    <span class="lang-en">Day 1</span>
                 </a></li>
                 <li><a href="#day2" class="nav-tab">
                     <span class="lang-ar">اليوم الثاني</span>
-                    <span class="lang-en" style="display: none;">Day 2</span>
+                    <span class="lang-en">Day 2</span>
                 </a></li>
                 <?php if (!empty($qr_cards)) : ?>
                 <li><a href="#qr-cards" class="nav-tab">
                     <span class="lang-ar">بطاقات QR</span>
-                    <span class="lang-en" style="display: none;">QR Cards</span>
+                    <span class="lang-en">QR Cards</span>
                 </a></li>
                 <?php endif; ?>
             </ul>
@@ -190,7 +194,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
             <header class="section-header">
                 <h2>
                     <span class="lang-ar"><?php echo esc_html($day1_title_ar); ?></span>
-                    <span class="lang-en" style="display: none;"><?php echo esc_html($day1_title_en); ?></span>
+                    <span class="lang-en"><?php echo esc_html($day1_title_en); ?></span>
                 </h2>
             </header>
 
@@ -200,7 +204,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <div class="schedule-section full-width">
                     <h3>
                         <span class="lang-ar">برنامج اليوم الأول</span>
-                        <span class="lang-en" style="display: none;">Day One Schedule</span>
+                        <span class="lang-en">Day One Schedule</span>
                     </h3>
                     
                     <div class="schedule-table">
@@ -209,11 +213,11 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 <tr>
                                     <th>
                                         <span class="lang-ar">الوقت</span>
-                                        <span class="lang-en" style="display: none;">Time</span>
+                                        <span class="lang-en">Time</span>
                                     </th>
                                     <th>
                                         <span class="lang-ar">النشاط</span>
-                                        <span class="lang-en" style="display: none;">Activity</span>
+                                        <span class="lang-en">Activity</span>
                                     </th>
                                 </tr>
                             </thead>
@@ -223,7 +227,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                     <td class="time"><?php echo esc_html($item['time']); ?></td>
                                     <td class="activity">
                                         <span class="lang-ar"><?php echo esc_html($item['activity_ar']); ?></span>
-                                        <span class="lang-en" style="display: none;"><?php echo esc_html($item['activity_en']); ?></span>
+                                        <span class="lang-en"><?php echo esc_html($item['activity_en']); ?></span>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -238,12 +242,25 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <div class="pdf-section full-width">
                     <h3>
                         <span class="lang-ar">ملف PDF - <?php echo esc_html($day1_title_ar); ?></span>
-                        <span class="lang-en" style="display: none;">PDF File - <?php echo esc_html($day1_title_en); ?></span>
+                        <span class="lang-en">PDF File - <?php echo esc_html($day1_title_en); ?></span>
                     </h3>
 
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
-                            <a href="<?php echo esc_url($day1_pdf_proxy . '&view=direct'); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener noreferrer">تحميل</a>
+                            <a
+                                <?php if ($day1_pdf_download) : ?>
+                                    href="<?php echo esc_url($day1_pdf_download); ?>"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                <?php else : ?>
+                                    href="#"
+                                    aria-disabled="true"
+                                <?php endif; ?>
+                                class="pdf-btn download-btn<?php echo $day1_pdf_download ? '' : ' is-disabled'; ?>"
+                            >
+                                <span class="lang-ar">تحميل</span>
+                                <span class="lang-en">Download</span>
+                            </a>
                         </div>
 
                         <div class="pdf-container">
@@ -255,7 +272,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 id="pdf-iframe-day1"
                                 class="pdf-frame"
                                 title="<?php echo esc_attr($day1_title_ar); ?> - PDF"
-                                data-pdf-proxy="<?php echo esc_url($day1_pdf_proxy); ?>"
+                                data-pdf-viewer="<?php echo esc_url($day1_pdf_viewer); ?>"
                                 loading="lazy"
                                 allowfullscreen>
                             </iframe>
@@ -263,12 +280,12 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     </div>
                 </div>
                 <?php endif; ?>
-                
+
                 <?php if (!empty($day1_images)) : ?>
                 <div class="images-section">
                     <h3>
                         <span class="lang-ar">صور اليوم الأول</span>
-                        <span class="lang-en" style="display: none;">Day One Images</span>
+                        <span class="lang-en">Day One Images</span>
                     </h3>
                     
                     <div class="images-gallery">
@@ -293,7 +310,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
             <header class="section-header">
                 <h2>
                     <span class="lang-ar"><?php echo esc_html($day2_title_ar); ?></span>
-                    <span class="lang-en" style="display: none;"><?php echo esc_html($day2_title_en); ?></span>
+                    <span class="lang-en"><?php echo esc_html($day2_title_en); ?></span>
                 </h2>
             </header>
 
@@ -303,7 +320,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <div class="schedule-section full-width">
                     <h3>
                         <span class="lang-ar">برنامج اليوم الثاني</span>
-                        <span class="lang-en" style="display: none;">Day Two Schedule</span>
+                        <span class="lang-en">Day Two Schedule</span>
                     </h3>
                     
                     <div class="schedule-table">
@@ -312,11 +329,11 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 <tr>
                                     <th>
                                         <span class="lang-ar">الوقت</span>
-                                        <span class="lang-en" style="display: none;">Time</span>
+                                        <span class="lang-en">Time</span>
                                     </th>
                                     <th>
                                         <span class="lang-ar">النشاط</span>
-                                        <span class="lang-en" style="display: none;">Activity</span>
+                                        <span class="lang-en">Activity</span>
                                     </th>
                                 </tr>
                             </thead>
@@ -326,7 +343,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                     <td class="time"><?php echo esc_html($item['time']); ?></td>
                                     <td class="activity">
                                         <span class="lang-ar"><?php echo esc_html($item['activity_ar']); ?></span>
-                                        <span class="lang-en" style="display: none;"><?php echo esc_html($item['activity_en']); ?></span>
+                                        <span class="lang-en"><?php echo esc_html($item['activity_en']); ?></span>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -341,12 +358,25 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <div class="pdf-section full-width">
                     <h3>
                         <span class="lang-ar">ملف PDF - <?php echo esc_html($day2_title_ar); ?></span>
-                        <span class="lang-en" style="display: none;">PDF File - <?php echo esc_html($day2_title_en); ?></span>
+                        <span class="lang-en">PDF File - <?php echo esc_html($day2_title_en); ?></span>
                     </h3>
 
                     <div class="pdf-viewer">
                         <div class="pdf-actions">
-                            <a href="<?php echo esc_url($day2_pdf_proxy . '&view=direct'); ?>" class="pdf-btn download-btn" target="_blank" rel="noopener noreferrer">تحميل</a>
+                            <a
+                                <?php if ($day2_pdf_download) : ?>
+                                    href="<?php echo esc_url($day2_pdf_download); ?>"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                <?php else : ?>
+                                    href="#"
+                                    aria-disabled="true"
+                                <?php endif; ?>
+                                class="pdf-btn download-btn<?php echo $day2_pdf_download ? '' : ' is-disabled'; ?>"
+                            >
+                                <span class="lang-ar">تحميل</span>
+                                <span class="lang-en">Download</span>
+                            </a>
                         </div>
 
                         <div class="pdf-container">
@@ -358,7 +388,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
                                 id="pdf-iframe-day2"
                                 class="pdf-frame"
                                 title="<?php echo esc_attr($day2_title_ar); ?> - PDF"
-                                data-pdf-proxy="<?php echo esc_url($day2_pdf_proxy); ?>"
+                                data-pdf-viewer="<?php echo esc_url($day2_pdf_viewer); ?>"
                                 loading="lazy"
                                 allowfullscreen>
                             </iframe>
@@ -371,7 +401,7 @@ if (!$qr_cards || !is_array($qr_cards)) {
                 <div class="images-section">
                     <h3>
                         <span class="lang-ar">صور اليوم الثاني</span>
-                        <span class="lang-en" style="display: none;">Day Two Images</span>
+                        <span class="lang-en">Day Two Images</span>
                     </h3>
                     
                     <div class="images-gallery">
@@ -397,11 +427,11 @@ if (!$qr_cards || !is_array($qr_cards)) {
             <header class="section-header">
                 <h2>
                     <span class="lang-ar">بطاقات QR</span>
-                    <span class="lang-en" style="display: none;">QR Cards</span>
+                    <span class="lang-en">QR Cards</span>
                 </h2>
                 <p>
                     <span class="lang-ar">امسح الرموز للوصول السريع للمواقع والملفات</span>
-                    <span class="lang-en" style="display: none;">Scan the codes for quick access to websites and files</span>
+                    <span class="lang-en">Scan the codes for quick access to websites and files</span>
                 </p>
             </header>
 
@@ -419,20 +449,20 @@ if (!$qr_cards || !is_array($qr_cards)) {
                     <div class="qr-content">
                         <h3 class="qr-title">
                             <span class="lang-ar"><?php echo esc_html($card['name_ar']); ?></span>
-                            <span class="lang-en" style="display: none;"><?php echo esc_html($card['name_en']); ?></span>
+                            <span class="lang-en"><?php echo esc_html($card['name_en']); ?></span>
                         </h3>
                         
                         <div class="qr-actions">
                             <a href="<?php echo esc_url($card['url']); ?>" target="_blank" class="qr-link-btn">
                                 <span class="lang-ar">فتح الرابط</span>
-                                <span class="lang-en" style="display: none;">Open Link</span>
+                                <span class="lang-en">Open Link</span>
                             </a>
                             
                             <button class="qr-share-btn" data-url="<?php echo esc_url($card['url']); ?>" 
                                     data-title-ar="<?php echo esc_attr($card['name_ar']); ?>" 
                                     data-title-en="<?php echo esc_attr($card['name_en']); ?>">
                                 <span class="lang-ar">مشاركة</span>
-                                <span class="lang-en" style="display: none;">Share</span>
+                                <span class="lang-en">Share</span>
                             </button>
                         </div>
                     </div>
@@ -862,6 +892,13 @@ body.lang-en-active {
     font-size: 0.9rem;
     transition: var(--transition);
     text-decoration: none;
+}
+
+.pdf-btn.is-disabled,
+.pdf-btn[aria-disabled="true"] {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
 }
 
 .pdf-btn:hover {
@@ -1525,14 +1562,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.querySelectorAll('.pdf-frame').forEach(function(frame) {
-        var proxyUrl = frame.getAttribute('data-pdf-proxy');
+        var viewerUrl = frame.getAttribute('data-pdf-viewer');
         var container = frame.closest('.pdf-container');
         var loading = container ? container.querySelector('.pdf-loading') : null;
+        var downloadLink = container ? container.parentElement.querySelector('.download-btn') : null;
 
-        if (!proxyUrl) {
+        if (!viewerUrl) {
             if (loading) {
                 loading.classList.add('error');
                 loading.innerHTML = '<p>ملف PDF غير متوفر.</p>';
+            }
+            if (downloadLink) {
+                downloadLink.setAttribute('aria-disabled', 'true');
+                downloadLink.classList.add('is-disabled');
             }
             return;
         }
@@ -1552,7 +1594,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        frame.setAttribute('src', proxyUrl);
+        frame.setAttribute('src', viewerUrl);
+    });
+
+    document.querySelectorAll('.download-btn[aria-disabled="true"]').forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+        });
     });
 
     document.querySelectorAll('.images-gallery').forEach(function(gallery) {
